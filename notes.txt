@@ -1,0 +1,22 @@
+sensor modes correspond to resolution
+sensor mode 0 seems to show full spectrum of camera, but we dont need such  high resolution (3264 x 2464)
+sensor mode 3 seems similar but is 4x less pixels (1640 x 1232)
+
+To get rid of the pink overlay around the center use the method from this link https://www.waveshare.com/wiki/IMX219-160_Camera
+
+
+----CALIBRATION-----
+To rectify an img in OpenCV we need to take at least 30 pictures of chessboard at different angles.
+https://docs.opencv.org/3.4.15/dc/dbb/tutorial_py_calibration.html
+The flow is:
+
+cv2.findChessBoardCorners => cv2.cornerSubPix (optional, only for drawing )=> cv2.calibrateCamera => matrices, coefficients etc. [SAVE RESULTS]
+=> cv2.getOptimalNewCameraMatrix (makes it possible to see the whole img after the undist. - with black fields (alpha = 1))=> cv2.undistort
+
+Using the ROI (region of insterest) returned by cv2.getOptimalNewCameraMatrix we can crop the image.
+Probalby using cv2.getOptimalNewCameraMatrix makes no sense unless we want the whole 
+(very strange looking) img or we want use different resolution, than the one used for calibration.
+
+----BIRD'S EYE VIEW-----
+- obszar zainteresowania
+- wykluczylem  dziub pojazdu przy dobieraniu punktow warp
