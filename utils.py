@@ -84,3 +84,7 @@ def perspective_warp(img, srcPts, dstSize=(640, 480), dstPts=np.float32([(0, 0),
 def drawCircle(img, points):
     for p in points:
         cv2.circle(img, (int(p[0] * img.shape[1]), int(p[1] * img.shape[0])), 10, (0, 255, 0), cv2.FILLED)
+
+# def drawCircle(img, points):
+#     for p in points:
+#         cv2.circle(img, (int(p[0]), int(p[1])), 10, (0, 255, 0), cv2.FILLED)

@@ -25,10 +25,23 @@ def get_vid():
             #img = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
             #img = camera_calibration.find_chessboard(img,draw=True, calibrate=True)
             undist = camera_calibration.undistort(img)
-            stack = lane_detector_module.findLane(undist)
+            undist = cv2.resize(undist,(640,480))
+            img_list = lane_detector_module.findLines(undist)
+            left_line, right_line = lane_detector_module.findCurvature(img_list[0])
+            #print(x1,x2)
+
+            warped = img_list[2].copy()
+            for pt in left_line:
+                cv2.circle(warped,pt,5,(0,0,255),cv2.FILLED)
+
+            for pt in right_line:
+                cv2.circle(warped,pt,5,(0,255,0),cv2.FILLED)
+            #cv2.circle(warped,right_line,5,(0,255,0),cv2.FILLED)
+            
+
             #streamer.set_frame(img,0,scale=0.2)
             #streamer.set_frame(undist,1,scale=0.2)
-            #stack = utils.stackImages(.25,[img, undist])
+            stack = utils.stackImages(.7,[img_list[1],warped,img_list[0]])
             #streamer.set_frame(stack,0,scale=0.6)
             cv2.imshow('Images',stack)
             keyCode = cv2.waitKey(30) & 0xFF
