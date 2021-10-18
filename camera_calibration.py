@@ -59,7 +59,8 @@ def import_calib():
 def undistort(img, alpha=1.0):
     global ret, mtx, dist, rvecs, tvecs
     h,  w = img.shape[:2]
-    undist = cv2.undistort(img, mtx, dist, None)
+    newcameramtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, (1640, 1232), 0, (w,h))
+    undist = cv2.undistort(img, mtx, dist, None, newcameramtx)
     #In case of different size image
     #newcameramtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, (1640, 1232), alpha)
     #new = cv2.undistort(img, mtx, dist, None, newcameramtx)
