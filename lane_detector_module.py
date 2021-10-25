@@ -6,21 +6,24 @@ left_line_prev_pt = np.empty((0),dtype=int)
 right_line_prev_pt = np.empty((0),dtype=int)
 lane_width_avg = 300
 
-warp_undistorted_values = [.47, 0.61, 1.56, .86]
+warp_undistorted_values = [.47, 0.61, 1.39, .86]
 warp_distorted_values = [0.51,0.61,1.21,.81]
+hsvTrackbarValues = [100,134,80,255,100,255]
 
 def init():
-    warpTrackBarValues = warp_distorted_values
+    warpTrackBarValues = warp_undistorted_values
     utils.initWarpTrackbars(warpTrackBarValues)
 
-    hsvTrackbarValues = [100,134,40,255,120,255]
+    
     utils.initHSVTrackbars(hsvTrackbarValues)
 
 def findLines(input_img):
     img = input_img.copy()
     #specify ROI using some sliders
     #WARP IMAGE TO BIRD'S EYE VIEW
-    warp_points_rel = utils.getWarpSourcePoints()
+    warp_points_rel = utils.getWarpSourcePoints(default=[x*100.0 for x in warp_undistorted_values])
+    #warp_points_rel = utils.getWarpSourcePoints()
+    #warp_points_rel = [x*100.0 for x in warp_undistorted_values]
     warped_img = utils.perspective_warp(img,warp_points_rel,dstSize=(img.shape[1],img.shape[0]))
     #from relative to absolute
     warp_points = np.empty_like(warp_points_rel)
@@ -33,7 +36,7 @@ def findLines(input_img):
     utils.drawCircle(img,warp_points_rel)
 
     #HSV mask to find the lane lines
-    blue_mask = utils.hsvThreshold(warped_img)
+    blue_mask = utils.hsvThreshold(warped_img,defaultHSV=hsvTrackbarValues)
 
     #find weighted_curvature
 
@@ -52,10 +55,10 @@ def findCurvature(input_img, debug_img=None):
     #window will be used to perform convolution and specify the height of line segment
     window_width = int(0.15 * img.shape[1])
     window_height = int(0.05 * img.shape[0])
-    line_erase_width = int(0.2 * img.shape[1])
+    line_erase_width = int(0.35 * img.shape[1])
     
     #blackman window that is similar to gaussian function
-    conv_win = np.blackman(window_width)
+    conv_win = np.blackman(window_width/3)
     
     #line data
     left_line_pts = np.empty((0,2),dtype=int)
@@ -63,10 +66,12 @@ def findCurvature(input_img, debug_img=None):
     center_line_pts = np.empty((0,2),dtype=int)
     weighted_curvature = np.empty((0,2),dtype=int)
     lane_widths = np.empty((0,1),dtype=int)
+    
+    #THERE IS A PROBLEM WITH TOO MANY ROWS -> at some point line can become horizontal and thus the whole algorithm stops working properly
     #rows * window_height is how far (in px) we look at the lane
-    rows = 8
-    #line detection threshold (empirically obtained)
-    detection_threshold = 80000
+    rows = 5
+    #line detection threshold (empirically obtained) (dependent on blackman window width)
+    detection_threshold = 20000
     #for each row
     for i in range(rows):
         #img cropped to row only
@@ -81,17 +86,32 @@ def findCurvature(input_img, debug_img=None):
         #if the peak is more than threshold we have a line
         if np.max(conv_histogram)>detection_threshold:
             center1 = np.argmax(conv_histogram)
+
+            #DEBUG LINES
+            #cv2.rectangle(dimg,(center1-int(window_width/2),dimg.shape[0]-int(i*window_height)),(center1+int(window_width/2),int(dimg.shape[0]-(i+1)*window_height)),(0,0,255),2)
+            #cv2.putText(dimg,str(np.max(conv_histogram)),(center1+int(window_width/2),int(dimg.shape[0]-(i)*window_height)),cv2.FONT_HERSHEY_SIMPLEX,1,(209,80,0,255),2)
             #cancel out the found center line from array
-            conv_histogram[center1-int(line_erase_width/2):center1+int(line_erase_width/2)]=0
+            #conv_histogram[center1-int(line_erase_width/2):center1+int(line_erase_width/2)]=0
+            conv_histogram[center1-int(line_erase_width/2) if center1>int(line_erase_width/2) else 0 :center1+int(line_erase_width/2)]=0
+
+
             #look for the second peak
             if np.max(conv_histogram)>detection_threshold:
                 center2 = np.argmax(conv_histogram)
+                
+                #cv2.rectangle(dimg,(center2-int(window_width/2),dimg.shape[0]-int(i*window_height)),(center2+int(window_width/2),int(dimg.shape[0]-(i+1)*window_height)),(0,255,0),2)
+                #cv2.putText(dimg,str(np.max(conv_histogram)),(center2+int(window_width/2),int(dimg.shape[0]-(i)*window_height)),cv2.FONT_HERSHEY_SIMPLEX,1,(209,80,0,255),2)
         #print(i,_conv_1_max,np.max(conv_histogram))
+
+
+        cv2.line(dimg,(0,int(dimg.shape[0] - (i+1)*window_height)),(dimg.shape[1],int(dimg.shape[0] - (i+1)*window_height)),(163, 163, 194),thickness=1)
         #if we found only ONE line segment
         if center1 != -1 and center2 == -1:
             #check if the line segment is closer to previously detected left line segments or right line segments
             #estimate lane middle using average lane width/2 (+-)
             #linalg.norm calculates distance between two points
+            #cv2.line(dimg,(center1,window_y_center),left_line_prev_pt,(0, 0, 255),thickness=1)
+            #cv2.line(dimg,(center1,window_y_center),right_line_prev_pt,(0, 255, 0),thickness=1)
             if np.linalg.norm([center1,window_y_center]-left_line_prev_pt) < np.linalg.norm([center1,window_y_center]-right_line_prev_pt):
             # if abs(center1-left_line_prev_pt) < abs(center1-right_line_prev_pt):
                 left_line_pts = np.append(left_line_pts,[(center1,window_y_center)],axis=0)

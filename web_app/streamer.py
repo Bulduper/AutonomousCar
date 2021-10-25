@@ -22,13 +22,13 @@ def on_pic(func):
 def index():
     global take_pic
     if request.method == 'POST':
-        #take_pic()
+        take_pic()
 
-        if request.form.get('demo'):
-            volume = request.form.get('demo')
-            print('volume:', volume)
-            #return jsonify({'volume': volume})
-            return json.dumps({'volume': volume})
+        # if request.form.get('demo'):
+        #     volume = request.form.get('demo')
+        #     print('volume:', volume)
+        #     #return jsonify({'volume': volume})
+        #     return json.dumps({'volume': volume})
     return render_template('index.html')
 
 def get_vid():

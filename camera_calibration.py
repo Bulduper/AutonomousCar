@@ -25,42 +25,44 @@ def find_chessboard(img, draw = True, calibrate = False):
             objpoints.append(objp)
             imgpoints.append(corners)
         if draw:
-            cv2.drawChessboardCorners(img, (9,6), corners2, ret)
+            cv2.drawChessboardCorners(img, CHECKERBOARD, corners2, ret)
+            # cv2.putText(img,str(len(objpoints)),(shape[0]/2,shape[1]/2),cv2.FONT_HERSHEY_SIMPLEX,2,(255,255,255))
     return img
 
 def calibrate(export=False):
     if len(objpoints)==0 or len(imgpoints)==0:
         print('No data to calibrate')
         return
-    global ret, mtx, dist, rvecs, tvecs
+    global ret, mtx, dist, rvecs, tvecs, shape
     ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints,shape, None, None)
-    print(f'Ret = {ret}')
-    print(f'Mtx = {mtx}')
-    print(f'Dist = {dist}')
-    print(f'Rvecs = {rvecs}')
-    print(f'Tvecs = {tvecs}')
+    # print(f'Ret = {ret}')
+    # print(f'Mtx = {mtx}')
+    # print(f'Dist = {dist}')
+    # print(f'Rvecs = {rvecs}')
+    # print(f'Tvecs = {tvecs}')
     if export:
-        np.save('./calib_data/ret.npy',ret)
-        np.save('./calib_data/mtx.npy',mtx)
-        np.save('./calib_data/dist.npy',dist)
-        np.save('./calib_data/rvecs.npy',rvecs)
-        np.save('./calib_data/tvecs.npy',tvecs)
+        np.save(f'./calib_data/ret_{shape[0]}.npy',ret)
+        np.save(f'./calib_data/mtx_{shape[0]}.npy',mtx)
+        np.save(f'./calib_data/dist_{shape[0]}.npy',dist)
+        np.save(f'./calib_data/rvecs_{shape[0]}.npy',rvecs)
+        np.save(f'./calib_data/tvecs_{shape[0]}.npy',tvecs)
+        print('CALIBRATION FILES EXPORTED')
 
-def import_calib():
+def import_calib(img_width=640):
     global ret, mtx, dist, rvecs, tvecs
-    ret = np.load('./calib_data/ret.npy')
-    mtx = np.load('./calib_data/mtx.npy')
-    dist = np.load('./calib_data/dist.npy')
-    rvecs = np.load('./calib_data/rvecs.npy')
-    tvecs = np.load('./calib_data/tvecs.npy')
+    ret = np.load(f'./calib_data/ret_{img_width}.npy')
+    mtx = np.load(f'./calib_data/mtx_{img_width}.npy')
+    dist = np.load(f'./calib_data/dist_{img_width}.npy')
+    rvecs = np.load(f'./calib_data/rvecs_{img_width}.npy')
+    tvecs = np.load(f'./calib_data/tvecs_{img_width}.npy')
     return ret, mtx, dist, rvecs, tvecs
 
 
 def undistort(img, alpha=1.0):
     global ret, mtx, dist, rvecs, tvecs
     h,  w = img.shape[:2]
-    newcameramtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, (1640, 1232), 0, (w,h))
-    undist = cv2.undistort(img, mtx, dist, None, newcameramtx)
+    #newcameramtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, (1640, 1232), 0, (w,h))
+    undist = cv2.undistort(img, mtx, dist, None)
     #In case of different size image
     #newcameramtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, (1640, 1232), alpha)
     #new = cv2.undistort(img, mtx, dist, None, newcameramtx)

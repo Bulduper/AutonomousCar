@@ -2,6 +2,9 @@ import cv2
 import numpy as np
 from TrackBarWindow import TrackBarWindow
 
+warpingTrackbars = None
+hsvTrackbars = None
+
 def stackImages(scale,imgArray):
     rows = len(imgArray)
     cols = len(imgArray[0])
@@ -47,9 +50,15 @@ def initHSVTrackbars(initVals):
         [['Hmin', initVals[0], 255], ['Hmax', initVals[1], 255], ['Smin', initVals[2], 255], ['Smax', initVals[3], 255],
          ['Vmin', initVals[4], 255], ['Vmax', initVals[5], 255]])
 
-def getWarpSourcePoints():
+def getWarpSourcePoints(default = None):
     global warpingTrackbars
-    warpParams = warpingTrackbars.getValues()
+    if warpingTrackbars is None:
+        if default is None:
+            print('No warping points source!')
+            raise
+        warpParams = default
+    else:
+        warpParams = warpingTrackbars.getValues()
     warpParams = [i / 100.0 for i in warpParams]
     srcPoints = np.float32([(0.5 - warpParams[0] / 2, warpParams[1]),
                             (0.5 + warpParams[0] / 2, warpParams[1]),
@@ -58,10 +67,15 @@ def getWarpSourcePoints():
     return srcPoints
 
 
-def hsvThreshold(img):
+def hsvThreshold(img, defaultHSV = None):
     imgHsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-
-    hsvValues = hsvTrackbars.getValues()
+    if hsvTrackbars is None:
+        if defaultHSV is None:
+            print('No HSV values source!')
+            raise
+        hsvValues = defaultHSV
+    else:
+        hsvValues = hsvTrackbars.getValues()
 
     lower = np.array([hsvValues[0], hsvValues[2], hsvValues[4]])
     upper = np.array([hsvValues[1], hsvValues[3], hsvValues[5]])
