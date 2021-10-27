@@ -167,6 +167,15 @@ def findCurvature(input_img, debug_img=None):
     #calculate average curvature (single value) using weighted curvature
     weights_sum = (rows+1)/2*rows
     avg_curvature = np.sum(weighted_curvature,axis=0)[0]/weights_sum;
-    #print(avg_curvature)
+    
+    #draw left, center and right lines using colored circles
+    for pt in left_line_pts:
+        cv2.circle(dimg,pt,5,(0,0,255),cv2.FILLED)
 
-    return left_line_pts, right_line_pts, center_line_pts, avg_curvature, dimg
+    for pt in right_line_pts:
+        cv2.circle(dimg,pt,5,(0,255,0),cv2.FILLED)
+    
+    for pt in center_line_pts:
+        cv2.circle(dimg,pt,5,(255,0,0),cv2.FILLED)
+
+    return center_line_pts, avg_curvature, dimg
