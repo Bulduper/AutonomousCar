@@ -36,9 +36,12 @@ def get_vid():
         try:
             res = uart.receiveAsync()
             if  res != None:
+                #print("UART RES",res)
                 res_dict = json.loads(res)
                 if "sensors" in res_dict:
                     parking.scan(res_dict["sensors"])
+                if "speed" in res_dict:
+                    parking.setSpeed(res_dict["speed"])
         except:
             print(f"Error parsing incoming data to JSON: {res}")
 
@@ -75,7 +78,8 @@ def get_vid():
             
             cv2.line(warped,(int(warped.shape[1]/2),warped.shape[0]),(int(warped.shape[1]/2),warped.shape[0]-50),(255,0,0),2)
             #if right turn is detected keep to the left and respectively                
-            driver.turn(disalignment)            
+            driver.turn(disalignment)
+            driver.requestTelemetry()           
 
             #streamer.set_frame(img,0,scale=0.2)
             #streamer.set_frame(undist,1,scale=0.2)
@@ -103,6 +107,8 @@ def take_picture():
     if var % 2 == 1:
         driver.speed(100)
     else: driver.speed(0)
+
+
     # global frame_no, img
     # print('Capturing this frame no '+str(frame_no))
     # cv2.imwrite('./img/chessbrd%d.jpg' % frame_no, img)
@@ -112,20 +118,27 @@ if __name__ == "__main__":
     global cap
     cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=0), cv2.CAP_GSTREAMER)
     time.sleep(2.0)
-    driver.requestEnvironment()
     camera_calibration.import_calib(640)
     if REMOTE_DESKTOP:
         lane_detector_module.init()
     
     t = threading.Thread(target=get_vid)
+    uart_thread = threading.Thread(target=uart.loop)
+    park_thread = threading.Thread(target=parking.mapAlong)
     t.daemon = True
+    uart_thread.deamon = True
+    park_thread.deamon = True
     t.start()
+    uart_thread.start()
+    park_thread.start()
     streamer.on_pic(take_picture)
     streamer.start_stream()
     #camera_calibration.import_calib()
     
     #wait till the thread is completed
     t.join()
+    uart_thread.join()
+    park_thread.join()
     
 
 if not cap is None:

@@ -1,4 +1,6 @@
+import time
 import serial
+from collections import OrderedDict
 
 
 stm32 = serial.Serial(
@@ -10,11 +12,33 @@ stm32 = serial.Serial(
     timeout = 0,
 )
 
-def writeCommand(prefix,data=""):
-    stm32.write("{0}{1}".format(prefix,data).encode())
+dict_queue = OrderedDict()
+
+#add to buffer (ordered dict)
+def writeCmdBuffered(prefix,data=""):
+    if prefix not in dict_queue:
+        dict_queue[prefix]=data
+    
 
 def receiveAsync():
     if stm32.inWaiting() > 0 :
         received = stm32.readline()
         return received
     return None
+
+#every 10ms try to send oldest record (command) from ordered dict
+def loop():
+    while True:
+        sendFromQueue()
+        time.sleep(0.01)
+
+# def setOnReceived(func):
+#     global on_received
+#     on_received = func
+
+def sendFromQueue():
+    if len(dict_queue)!=0:
+        key,value = dict_queue.popitem(last=False)
+        #print("sending...",key, value)
+        stm32.write("{0}{1}\n".format(key,value).encode())
+        
