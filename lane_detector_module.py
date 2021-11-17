@@ -69,7 +69,7 @@ def findCurvature(input_img, debug_img=None):
     
     #THERE IS A PROBLEM WITH TOO MANY ROWS -> at some point line can become horizontal and thus the whole algorithm stops working properly
     #rows * window_height is how far (in px) we look at the lane
-    rows = 5
+    rows = 10
     #line detection threshold (empirically obtained) (dependent on blackman window width)
     detection_threshold = 20000
     #for each row

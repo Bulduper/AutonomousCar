@@ -20,3 +20,59 @@ Probalby using cv2.getOptimalNewCameraMatrix makes no sense unless we want the w
 ----BIRD'S EYE VIEW-----
 - obszar zainteresowania
 - wykluczylem  dziub pojazdu przy dobieraniu punktow warp
+
+
+-----JETSON UTILS - VERY IMPORTANT!!!-------
+
+Normally with the native code for jetson.utils flip-method=rotate-180 causes crash!
+In order to be able to proceed without crash we need to:
+
+cd /path/to/your/jetson-inference/build
+cmake -DDISABLE_NVMM ../
+make
+sudo make install
+(https://forums.developer.nvidia.com/t/gstreamer-gstdecoder-failed-to-retrieve-next-image-buffer/195168/2)
+
+----OPENCV vs. JETSON.UTILS for camera streaming-----
+For basic program which only captures image from camera in the loop:
+
+Gstreamer - 30fps, #3 mode, (display 1640x1232):
+OPENCV with displaying : T=0.06s=> 15fps
+OPENCV without displaying: T=0.06s=>15fps
+where cap.read() takes almost all of that time (60ms on average)
+
+Gstreamer - 30fps, #3 mode, (display 640x480)
+cap.read() takes 30ms on average
+
+-------opencv tests on opencv_test.py script-----
+fps measured every 3s:
+GSTR: 20FPS, 0mode, 640x480 => 20fps
+GSTR: 20FPS, 1mode, 640x480 => 20fps
+GSTR: 28FPS, 1mode, 640x480 => 28fps
+GSTR: 30FPS, 2mode, 640x480 => 30fps (restricted fov)
+GSTR: 30FPS, 3mode, 640x480 => 30fps
+GSTR: 60FPS, 4mode, 640x480 => 55fps
+GSTR: 60FPS, 4mode, 480x240 => 56fps
+GSTR: 120FPS, 5mode, 640x480 => 50fps
+GSTR: 120FPS, 5mode, 640x480 => 60fps (no cv2.imshow)
+GSTR: 120FPS, 5mode, 150x100 => 60fps (no cv2.imshow)
+
+GSTR: 30FPS, 5mode, 1640x1232 => 14fps (restricted fov)
+GSTR: 30FPS, 5mode, 1640x1232 => 16fps (no cv2.imshow)
+GSTR: 30FPS, 3mode, 1640x1232 => 16fps (no cv2.imshow)
+GSTR: 30FPS, 3mode, 1640x1232 => 14fps
+GSTR: 30FPS, 4mode, 1280x720 => 27fps (restricted fov)
+GSTR: 30FPS, 5mode, 1280x720 => 27fps (restricted fov)
+GSTR: 30FPS, 3mode, 1280x720 => 28/29fps
+GSTR: 20FPS, 3mode, 1280x720 => 20fps
+GSTR: 20FPS, 0mode, 1280x720 => 20fps
+GSTR: 20FPS, 1mode, 1280x720 => 20fps (narrower top-bottom but full width)
+
+
+-------jetson.utils Capture()  jetson-camera.py------
+1280x720, 30FPS (5mode) => 30fps
+1280x720, 120FPS (5mode) => 37fps
+1280x720, 60FPS (5mode) => 37fps
+1640x1232, 30FPS (3mode) => 30fps
+3264x2646, 20FPS (0mode) => 17fps
+

@@ -99,6 +99,11 @@ def drawCircle(img, points):
     for p in points:
         cv2.circle(img, (int(p[0] * img.shape[1]), int(p[1] * img.shape[0])), 10, (0, 255, 0), cv2.FILLED)
 
+def rotateImg(img,degrees=180):
+    center = (img.shape[1]//2, img.shape[0]//2)
+    M = cv2.getRotationMatrix2D(center, degrees,scale=1.0)
+    rotated = cv2.warpAffine(img, M, (img.shape[1], img.shape[0]))
+    return rotated
 # def drawCircle(img, points):
 #     for p in points:
 #         cv2.circle(img, (int(p[0]), int(p[1])), 10, (0, 255, 0), cv2.FILLED)

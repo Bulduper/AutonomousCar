@@ -14,21 +14,29 @@ stm32 = serial.Serial(
 
 dict_queue = OrderedDict()
 
+func_on_received = None
+
 #add to buffer (ordered dict)
 def writeCmdBuffered(prefix,data=""):
     if prefix not in dict_queue:
         dict_queue[prefix]=data
     
+def onReceived(func):
+    global func_on_received
+    func_on_received = func
 
 def receiveAsync():
-    if stm32.inWaiting() > 0 :
+    global func_on_received
+    if stm32.inWaiting() > 0 and func_on_received is not None:
         received = stm32.readline()
-        return received
-    return None
+        func_on_received(received)
+        #return received
+    #return None
 
 #every 10ms try to send oldest record (command) from ordered dict
 def loop():
     while True:
+        receiveAsync()
         sendFromQueue()
         time.sleep(0.01)
 
