@@ -76,3 +76,9 @@ GSTR: 20FPS, 1mode, 1280x720 => 20fps (narrower top-bottom but full width)
 1640x1232, 30FPS (3mode) => 30fps
 3264x2646, 20FPS (0mode) => 17fps
 
+
+-------SOCKET.IO-----------------
+
+running Flask or Socket.io on server with Debug mode 'True' makes it not runnable in Threads!
+
+

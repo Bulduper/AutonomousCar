@@ -1,3 +1,4 @@
+from sys import argv
 from flask import Flask, render_template, Response, request, json
 from flask_socketio import SocketIO
 from flask_socketio import send, emit
@@ -41,4 +42,4 @@ class HttpStreamer:
         #with lock?
 
     def run(self):
-        self.socketio.run(self.app,host='0.0.0.0',debug=True, threaded=True)
+        self.socketio.run(self.app,host='0.0.0.0',debug=True)

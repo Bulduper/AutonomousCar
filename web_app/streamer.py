@@ -36,10 +36,10 @@ def get_vid():
         ret_val, img = cap.read()
         if ret_val:
             #img = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-            set_frame(img)
+            setFrame(img)
     cap.release()
 
-def set_frame(frame, which = 0, scale = 0.4):
+def setFrame(frame, which = 0, scale = 0.4):
     global outputFrame, lock
     frame = cv2.resize(frame, (round(frame.shape[1]*scale), round(frame.shape[0]*scale)))
     with lock:
@@ -84,7 +84,7 @@ def video_feed_2():
     return Response(gen_frame_2(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
-def start_stream():
+def run():
     app.run(host='0.0.0.0', threaded=True)
     #socketio.run(app,host='0.0.0.0',debug=True)
 
@@ -95,6 +95,6 @@ if __name__ == '__main__':
     t = threading.Thread(target=get_vid)
     t.daemon = True
     t.start()
-    start_stream()
+    run()
 
 

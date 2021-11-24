@@ -2,7 +2,6 @@ import time
 import serial
 from collections import OrderedDict
 
-
 stm32 = serial.Serial(
     port = '/dev/ttyTHS1',
     baudrate = 115200,

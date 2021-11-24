@@ -49,20 +49,27 @@ def calibrate(export=False):
         print('CALIBRATION FILES EXPORTED')
 
 def import_calib(img_width=640):
-    global ret, mtx, dist, rvecs, tvecs
+    global ret, mtx, dist, rvecs, tvecs, mapx, mapy
     ret = np.load(f'./calib_data/ret_{img_width}.npy')
     mtx = np.load(f'./calib_data/mtx_{img_width}.npy')
     dist = np.load(f'./calib_data/dist_{img_width}.npy')
     rvecs = np.load(f'./calib_data/rvecs_{img_width}.npy')
     tvecs = np.load(f'./calib_data/tvecs_{img_width}.npy')
+
+    mapx, mapy = cv2.initUndistortRectifyMap(mtx, dist, None, mtx, (img_width,480), 5)
     return ret, mtx, dist, rvecs, tvecs
 
 
 def undistort(img, alpha=1.0):
-    global ret, mtx, dist, rvecs, tvecs
+    global ret, mtx, dist, rvecs, tvecs, mapx, mapy
     h,  w = img.shape[:2]
     #newcameramtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, (1640, 1232), 0, (w,h))
-    undist = cv2.undistort(img, mtx, dist, None)
+    
+    #### cv2.undistort SIGNIFICANTLY LESS EFFICIENT
+    # undist = cv2.undistort(img, mtx, dist, None)
+    #### cv2.remap MORE EFFICIENT,  requires mapx, mapy = cv2.initUndistortRectifyMap() on init
+    undist = cv2.remap(img, mapx, mapy, cv2.INTER_LINEAR)
+
     #In case of different size image
     #newcameramtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, (1640, 1232), alpha)
     #new = cv2.undistort(img, mtx, dist, None, newcameramtx)
