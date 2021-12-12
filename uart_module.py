@@ -1,6 +1,7 @@
 import time
 import serial
 from collections import OrderedDict
+# import web_app.streamer_new_noclass as streamer
 
 stm32 = serial.Serial(
     port = '/dev/ttyTHS1',
@@ -46,6 +47,6 @@ def loop():
 def sendFromQueue():
     if len(dict_queue)!=0:
         key,value = dict_queue.popitem(last=False)
-        #print("sending...",key, value)
+        # print("sending...",key, value)
         stm32.write("{0}{1}\n".format(key,value).encode())
         

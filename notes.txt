@@ -82,3 +82,22 @@ GSTR: 20FPS, 1mode, 1280x720 => 20fps (narrower top-bottom but full width)
 running Flask or Socket.io on server with Debug mode 'True' makes it not runnable in Threads!
 
 
+---------net.Detect()------------
+When video capturing&detection was in Thread:
+-net.detect caused GST error if uart thread was started (image processing Thread ok)
+
+When video capturing&detection was in main:
+-net.detect caused GST error only when monkey_patching was on, everything else was working
+
+Just initializing net by net = jetson.inference.detectNet ... causes frequent GST errors (EOL) (but only in some circumstances I think)
+
+---Redis installation (remote dictionary)
+
+sudo apt install redis-server
+pip3 install redis
+
+when I installed redis with:
+pip3 install redis
+I had an 'Command "python setup.py egg_info" failed with error code 1 in /tmp/pip-build-pw6uuudq/wrapt/' error
+I solved it with pip3 install --upgrade setuptools
+

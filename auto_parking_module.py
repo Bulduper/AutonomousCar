@@ -6,9 +6,13 @@ import time
 import uart_module as uart
 
 module_enabled = False
+space_mapping = False
+find_and_park = False
 
 find_left = True
 find_right = False
+gap_found_left = False
+gap_found_right= False
 #resolution in cm/sample (measurement every N cm of forward distance)
 resolution=3
 #how far back will the measurements be remembered [cm]
@@ -25,6 +29,7 @@ right_len = -resolution
 #in cmps
 driving_speed = 0.0
 
+interval_default = 1.0
 space_found = False
 awaiting = False
 
@@ -54,20 +59,29 @@ def update(dist_list):
     #     print(item)
     # #print(list(left_map.queue))
     # print('############################')
-    findParkingSpace(dist_list[4],dist_list[1])
+    if find_and_park:
+        findParkingSpace(dist_list[4],dist_list[1])
 
 def setSpeed(speed):
-    global driving_speed
+    global driving_speed,space_mapping
     driving_speed = speed/10.0
 
+
 def loop():
+    global interval_default,space_mapping
     while True:
+        driver.requestEnvironment()
         if module_enabled:
-            if driving_speed != 0.0:
-                interval = resolution/abs(driving_speed)
-                driver.requestEnvironment()
-                time.sleep(interval)
-            parkSequence()
+            if driving_speed==0.0:
+                space_mapping = False
+            else: 
+                space_mapping = True
+                interval = resolution/abs(driving_speed)                
+            
+            if find_and_park:
+                parkSequence()
+        else: interval = interval_default
+        time.sleep(interval)
 
 def findParkingSpace(left_depth, right_depth):
     global left_len, right_len, space_found
@@ -83,11 +97,15 @@ def findParkingSpace(left_depth, right_depth):
 
 
     if left_len > length_thr and seq_step==0:
-        print("PARKING SPACE FOUND!!!!")
-        space_found = True
+        print("Parking place found on the left!")
+        gap_found_left = True
         driver.setLED(led1=True)
-        return True
-    return False
+
+    if right_len > length_thr and seq_step==0:
+        print("Parking place found on the right!")
+        gap_found_right = True
+        driver.setLED(led1=True)
+    return gap_found_right or gap_found_left
 
 
 

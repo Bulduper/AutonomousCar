@@ -25,12 +25,12 @@
      inkscape:document-units="mm"
      showgrid="false"
      showguides="false"
-     inkscape:zoom="1.4550879"
-     inkscape:cx="210.98381"
-     inkscape:cy="130.91992"
-     inkscape:window-width="1920"
-     inkscape:window-height="1001"
-     inkscape:window-x="-9"
+     inkscape:zoom="1.0289025"
+     inkscape:cx="27.699417"
+     inkscape:cy="483.52491"
+     inkscape:window-width="3200"
+     inkscape:window-height="1721"
+     inkscape:window-x="2391"
      inkscape:window-y="-9"
      inkscape:window-maximized="1"
      inkscape:current-layer="layer1"
@@ -103,6 +103,84 @@
        width="144.32118"
        height="46.732571"
        id="rect40398-2-57-5" />
+    <filter
+       inkscape:collect="always"
+       style="color-interpolation-filters:sRGB"
+       id="filter2389"
+       x="-0.13680825"
+       y="-0.13402334"
+       width="1.2736165"
+       height="1.2680467">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="2.8217595"
+         id="feGaussianBlur2391" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       style="color-interpolation-filters:sRGB"
+       id="filter2393"
+       x="-0.13680824"
+       y="-0.13402334"
+       width="1.2736165"
+       height="1.2680467">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="2.8217595"
+         id="feGaussianBlur2395" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       style="color-interpolation-filters:sRGB"
+       id="filter2397"
+       x="-0.1269185"
+       y="-0.15763103"
+       width="1.253837"
+       height="1.3152621">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="2.8217595"
+         id="feGaussianBlur2399" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       style="color-interpolation-filters:sRGB"
+       id="filter2401"
+       x="-0.13680824"
+       y="-0.13402332"
+       width="1.2736165"
+       height="1.2680466">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="2.8217595"
+         id="feGaussianBlur2403" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       style="color-interpolation-filters:sRGB"
+       id="filter2405"
+       x="-0.13680825"
+       y="-0.13402332"
+       width="1.2736165"
+       height="1.2680466">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="2.8217595"
+         id="feGaussianBlur2407" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       style="color-interpolation-filters:sRGB"
+       id="filter2409"
+       x="-0.1269185"
+       y="-0.15763103"
+       width="1.253837"
+       height="1.3152621">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="2.8217595"
+         id="feGaussianBlur2411" />
+    </filter>
   </defs>
   <g
      inkscape:label="Warstwa 1"
@@ -118,33 +196,33 @@
        y="46.900002" />
     <path
        id="sensor_3_zone"
-       style="fill:#00c400;fill-opacity:1;fill-rule:evenodd;stroke-width:0.314256"
+       style="fill:#00e400;fill-opacity:0.83648878;fill-rule:evenodd;stroke-width:0.314256;opacity:1;filter:url(#filter2389)"
        d="M 64.901464,1.5429064 H 114.40303 L 109.90289,47.444363 83.416337,52.073081 Z"
        sodipodi:nodetypes="ccccc" />
     <path
        id="sensor_4_zone"
-       style="fill:#00c400;fill-opacity:1;fill-rule:evenodd;stroke-width:0.314256"
+       style="fill:#00e400;fill-opacity:0.83648878;fill-rule:evenodd;stroke-width:0.314256;filter:url(#filter2409)"
        d="M 14.307,142.15851 V 99.196013 l 53.358831,18.000567 v 9.77173 z"
        sodipodi:nodetypes="ccccc" />
     <path
        id="sensor_1_zone"
-       style="fill:#00c400;fill-opacity:1;fill-rule:evenodd;stroke-width:0.314256"
+       style="fill:#00e400;fill-opacity:0.83648878;fill-rule:evenodd;stroke-width:0.314256;filter:url(#filter2397)"
        d="M 215.01337,142.15851 V 99.196013 l -53.35883,18.000567 v 9.77173 z"
        sodipodi:nodetypes="ccccc"
        inkscape:label="sensor_1_zone" />
     <path
        id="sensor_0_zone"
-       style="fill:#00c400;fill-opacity:1;fill-rule:evenodd;stroke-width:0.314256"
+       style="fill:#00e400;fill-opacity:0.83648878;fill-rule:evenodd;stroke-width:0.314256;filter:url(#filter2393)"
        d="m 164.67605,1.5429064 h -49.50157 l 4.50014,45.9014566 26.48656,4.628718 z"
        sodipodi:nodetypes="ccccc" />
     <path
        id="sensor_5_zone"
-       style="fill:#00c400;fill-opacity:1;fill-rule:evenodd;stroke-width:0.314256"
+       style="fill:#00e400;fill-opacity:0.83648878;fill-rule:evenodd;stroke-width:0.314256;filter:url(#filter2405)"
        d="m 64.901464,293.72945 h 49.501566 l -4.50014,-45.90146 -26.486553,-4.62872 z"
        sodipodi:nodetypes="ccccc" />
     <path
        id="sensor_2_zone"
-       style="fill:#00c400;fill-opacity:1;fill-rule:evenodd;stroke-width:0.314256"
+       style="fill:#00e400;fill-opacity:0.83648878;fill-rule:evenodd;stroke-width:0.314256;filter:url(#filter2401)"
        d="m 164.67605,293.72945 h -49.50157 l 4.50014,-45.90146 26.48656,-4.62872 z"
        sodipodi:nodetypes="ccccc" />
     <text
@@ -157,7 +235,7 @@
        inkscape:label="sensor_3_dist"><tspan
          x="310.78979"
          y="80.105225"
-         id="tspan893">0 cm</tspan></text>
+         id="sensor_3_dist_text">0 cm</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,47.109152,4.1318266)"
@@ -168,7 +246,7 @@
        inkscape:label="sensor_0_dist"><tspan
          x="310.78979"
          y="80.105225"
-         id="tspan895">0 cm</tspan></text>
+         id="sensor_0_dist_text">0 cm</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,103.10915,104.13183)"
@@ -179,7 +257,7 @@
        inkscape:label="sensor_1_dist"><tspan
          x="310.78979"
          y="80.105225"
-         id="tspan897">0 cm</tspan></text>
+         id="sensor_1_dist_text">0 cm</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,-50.20213,104.13183)"
@@ -190,7 +268,7 @@
        inkscape:label="sensor_4_dist"><tspan
          x="310.78979"
          y="80.105225"
-         id="tspan899">0 cm</tspan></text>
+         id="sensor_4_dist_text">0 cm</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,4.1091525,252.96175)"
@@ -201,7 +279,7 @@
        inkscape:label="sensor_5_dist"><tspan
          x="310.78979"
          y="80.105225"
-         id="tspan901">0 cm</tspan></text>
+         id="sensor_5_dist_text">0 cm</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,47.109152,252.96175)"
@@ -212,7 +290,7 @@
        inkscape:label="sensor_2_dist"><tspan
          x="310.78979"
          y="80.105225"
-         id="tspan903">0 cm</tspan></text>
+         id="sensor_2_dist_text">0 cm</tspan></text>
     <path
        id="arrow"
        style="fill:#000000;stroke-width:0.148747"
@@ -233,6 +311,6 @@
        y="0"><tspan
          x="6.5946944"
          y="23.903244"
-         id="tspan905">100</tspan></text>
+         id="tspan4977">100</tspan></text>
   </g>
 </svg>
