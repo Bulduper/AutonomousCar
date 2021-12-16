@@ -1,6 +1,7 @@
 import numpy as np
 import utils
 import cv2
+import math
 
 left_line_prev_pt = np.empty((0),dtype=int)
 right_line_prev_pt = np.empty((0),dtype=int)
@@ -10,6 +11,9 @@ warp_undistorted_values = [.47, 0.61, 1.39, .86]
 warp_distorted_values = [0.51,0.61,1.21,.81]
 hsvTrackbarValues = [100,134,80,255,100,255]
 
+#IMAGES HALF-PRODUCT
+global warped_img, hsv_mask, debug_img
+
 def init():
     warpTrackBarValues = warp_undistorted_values
     utils.initWarpTrackbars(warpTrackBarValues)
@@ -18,6 +22,7 @@ def init():
     utils.initHSVTrackbars(hsvTrackbarValues)
 
 def findLines(input_img):
+    global warped_img, hsv_mask
     img = input_img.copy()
     #specify ROI using some sliders
     #WARP IMAGE TO BIRD'S EYE VIEW
@@ -36,21 +41,22 @@ def findLines(input_img):
     utils.drawCircle(img,warp_points_rel)
 
     #HSV mask to find the lane lines
-    blue_mask = utils.hsvThreshold(warped_img,defaultHSV=hsvTrackbarValues)
+    hsv_mask = utils.hsvThreshold(warped_img,defaultHSV=hsvTrackbarValues)
 
-    #find weighted_curvature
+    return hsv_mask
 
-    return [blue_mask,img,warped_img]
+def getLanePoints(input_img):
+    global left_line_prev_pt, right_line_prev_pt, lane_width_avg, debug_img
 
-def findCurvature(input_img, debug_img=None):
-    global left_line_prev_pt, right_line_prev_pt, lane_width_avg
+    img_mask = findLines(input_img)
+
     if not left_line_prev_pt.any():
-        left_line_prev_pt = np.array([-1,input_img.shape[0]])
+        left_line_prev_pt = np.array([-1,img_mask.shape[0]])
     if not right_line_prev_pt.any():
-        right_line_prev_pt = np.array([input_img.shape[1],input_img.shape[0]])
-    
-    if not debug_img is None: dimg = debug_img.copy()
-    img = input_img.copy()
+        right_line_prev_pt = np.array([img_mask.shape[1],img_mask.shape[0]])
+
+    debug_img = warped_img.copy()
+    img = img_mask.copy()
     #window variables
     #window will be used to perform convolution and specify the height of line segment
     window_width = int(0.15 * img.shape[1])
@@ -103,8 +109,9 @@ def findCurvature(input_img, debug_img=None):
                 #cv2.putText(dimg,str(np.max(conv_histogram)),(center2+int(window_width/2),int(dimg.shape[0]-(i)*window_height)),cv2.FONT_HERSHEY_SIMPLEX,1,(209,80,0,255),2)
         #print(i,_conv_1_max,np.max(conv_histogram))
 
-
-        cv2.line(dimg,(0,int(dimg.shape[0] - (i+1)*window_height)),(dimg.shape[1],int(dimg.shape[0] - (i+1)*window_height)),(163, 163, 194),thickness=1)
+        # row rectangle
+        # cv2.line(dimg,(0,int(dimg.shape[0] - (i+1)*window_height)),(dimg.shape[1],int(dimg.shape[0] - (i+1)*window_height)),(163, 163, 194),thickness=1)
+        
         #if we found only ONE line segment
         if center1 != -1 and center2 == -1:
             #check if the line segment is closer to previously detected left line segments or right line segments
@@ -133,49 +140,36 @@ def findCurvature(input_img, debug_img=None):
             right_line_prev_pt = np.array([center2,window_y_center])
             center_line_pts = np.append(center_line_pts,[(int((center1+center2)/2),window_y_center)],axis=0)
             lane_widths = np.append(lane_widths,[center2-center1])
-            #if we already have two center line points
-            if len(center_line_pts)>1:
-                #calculate the y-axis increment Y2-Y1
-                y_diff = int((center_line_pts[-1][1] - center_line_pts[-2][1])/window_height)
-                #calculate weighted curvature and append it to array
-                #curvature is dX/dROW
-                #weighted curvature id curvature * (rows - row) => the closest line segments are most significant
-                #weighted_curvature array element can be presented as a vector pointing from the first center_line point  => [weighted_curvature=(w*dX), Y1]
-                weighted_curvature = np.append(weighted_curvature,[((rows-i)*((center_line_pts[-1][0] - center_line_pts[-2][0])/y_diff),int(img.shape[0] - (i-0.5)*window_height))],axis=0)
+
     #if any left line was detected => set its first point as previous left line point 
     if left_line_pts.any():
         #left_line_prev_pt  = np.mean(left_line_pts[:,0])
         left_line_prev_pt = left_line_pts[0]
     #if not => let the left down corner be a previous point (that is where we expect the line to appear)
     else:
-        left_line_prev_pt = np.array([-1,input_img.shape[0]])
+        left_line_prev_pt = np.array([-1,img.shape[0]])
     #respectively
     if right_line_pts.any():
         #right_line_prev_pt  = np.mean(right_line_pts[:,0])
         right_line_prev_pt = right_line_pts[0]
     else:
-        right_line_prev_pt = np.array([input_img.shape[1],input_img.shape[0]])
-    
+        right_line_prev_pt = np.array([img.shape[1],img.shape[0]])
+
     if lane_widths.any():
         lane_width_avg  = np.mean(lane_widths)
-    #print(left_line_prev_pt, right_line_prev_pt)
-    # for i in range(len(center_line_pts)-1):
-    #     weight = rows - center_line_pts[i][1]
-    #     weighted_curvature = np.append(weighted_curvature,[weight*(center_line_pts[i+1][0] - center_line_pts[i][0],center_line_pts[i][1])],axis=0)
-    #     print(i,weighted_curvature[i])
-    #weights = range(rows,0)
-    #calculate average curvature (single value) using weighted curvature
-    weights_sum = (rows+1)/2*rows
-    avg_curvature = np.sum(weighted_curvature,axis=0)[0]/weights_sum;
-    
-    #draw left, center and right lines using colored circles
-    for pt in left_line_pts:
-        cv2.circle(dimg,pt,5,(0,0,255),cv2.FILLED)
 
-    for pt in right_line_pts:
-        cv2.circle(dimg,pt,5,(0,255,0),cv2.FILLED)
-    
-    for pt in center_line_pts:
-        cv2.circle(dimg,pt,5,(255,0,0),cv2.FILLED)
 
-    return center_line_pts, avg_curvature, dimg
+    return left_line_pts, center_line_pts, right_line_pts
+
+
+def getCurveAngle(pts):
+    angles = []
+    for i in range(1, len(pts)):
+        dx = pts[i][0]-pts[i-1][0]
+        dy = pts[i][1]-pts[i-1][1]
+        if dy == 0: continue
+        angle = math.degrees(math.atan(dx/dy))
+        angles.append(angle)
+    if len(angles):
+        avg_angle = sum(angles)/len(angles)
+        return avg_angle 

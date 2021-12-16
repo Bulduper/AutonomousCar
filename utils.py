@@ -107,3 +107,10 @@ def rotateImg(img,degrees=180):
 # def drawCircle(img, points):
 #     for p in points:
 #         cv2.circle(img, (int(p[0]), int(p[1])), 10, (0, 255, 0), cv2.FILLED)
+
+def drawLaneLine(img, points, color):
+    for p in points:
+        cv2.circle(img,p,5,color,cv2.FILLED)
+
+def drawStraightLine(img,pt1,pt2,color):
+    cv2.line(img,pt1,pt2,color,2)

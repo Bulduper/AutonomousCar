@@ -22,11 +22,11 @@ x=3
 
 emiting_period = 0.5
 
-@socketio.on('user_input')
-def forwardControlData(data):
+@socketio.on('mode')
+def onModeEvent(data):
     #assuming type of data is string (stringified JSON)
     if data:
-        r.set("user_input",data)
+        r.publish('mode',data)
 
 @socketio.on('buttonPressed')
 def onButtonPressed(data):

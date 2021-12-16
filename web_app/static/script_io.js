@@ -1,4 +1,5 @@
 var socket = io();
+// let dataOut = {mode: "manual", target_speed: 0, target_angle: 0};
 let dataOut = {};
 let dataOutUpdated = false;
 // document.getElementById('button').addEventListener('click', buttonPressedEmit);
@@ -24,8 +25,9 @@ document.getElementById('signDetectorSwitch').addEventListener('change',function
 function emitDataOut(){
     //emit only if dataOut is not empty and there is some new data
     if(dataOutUpdated && Object.keys(dataOut).length !== 0 || dataOut.constructor !== Object){
-        socket.emit('user_input',JSON.stringify(dataOut));
+        socket.emit('mode',JSON.stringify(dataOut));
         dataOutUpdated = false;
+        dataOut = {};
     }
 }
 
