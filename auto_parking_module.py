@@ -6,8 +6,8 @@ import time
 import uart_module as uart
 
 module_enabled = False
-space_mapping = False
-find_and_park = False
+space_mapping = True
+find_and_park = True
 
 find_left = True
 find_right = False
@@ -33,8 +33,12 @@ interval_default = 1.0
 space_found = False
 awaiting = False
 
-SEQUENCE = [('P',200), ('T',60), ('P',-300), ('T',-60), ('P',-300), ('T',0), ('P',80)]
+SEQUENCE = [('s',100),('P',200), ('T',60), ('P',-300), ('T',-60), ('P',-300), ('T',0)]
 seq_step = 0
+
+seq_done = False
+
+now_parking = False
 
 def enable():
     global module_enabled 
@@ -59,7 +63,7 @@ def update(dist_list):
     #     print(item)
     # #print(list(left_map.queue))
     # print('############################')
-    if find_and_park:
+    if find_and_park and not now_parking:
         findParkingSpace(dist_list[4],dist_list[1])
 
 def setSpeed(speed):
@@ -68,29 +72,39 @@ def setSpeed(speed):
 
 
 def loop():
-    global interval_default,space_mapping
+    global interval_default,space_mapping, gap_found_right, gap_found_left
     while True:
         driver.requestEnvironment()
         if module_enabled:
             if driving_speed==0.0:
                 space_mapping = False
-            else: 
+            elif not now_parking: 
                 space_mapping = True
                 interval = resolution/abs(driving_speed)                
             
-            if find_and_park:
-                parkSequence()
+            if find_and_park and gap_found_left and now_parking:
+                parkSequence('left')
+
+            if find_and_park and gap_found_right and now_parking:
+                parkSequence('right')
+
+            if now_parking and seq_done:
+                gap_found_left = False
+                gap_found_right = False
+                interval = 0.3
+                align()
         else: interval = interval_default
         time.sleep(interval)
 
+
 def findParkingSpace(left_depth, right_depth):
-    global left_len, right_len, space_found
-    if left_len>= depth_thr :
+    global left_len, right_len, gap_found_right, gap_found_left, now_parking
+    if left_depth>= depth_thr :
         left_len += resolution
     else:
         left_len = -resolution
     
-    if right_len>= depth_thr :
+    if right_depth>= depth_thr :
         right_len += resolution
     else:
         right_len = -resolution
@@ -100,21 +114,39 @@ def findParkingSpace(left_depth, right_depth):
         print("Parking place found on the left!")
         gap_found_left = True
         driver.setLED(led1=True)
+        if find_left: now_parking=True
 
     if right_len > length_thr and seq_step==0:
         print("Parking place found on the right!")
         gap_found_right = True
         driver.setLED(led1=True)
-    return gap_found_right or gap_found_left
+        if find_right: now_parking=True
+    return gap_found_right, gap_found_left
 
 
 
-def parkSequence():
-    global space_found, awaiting, seq_step, SEQUENCE
-    if space_found and awaiting == False:
+def parkSequence(side):
+    global now_parking, awaiting, seq_step, SEQUENCE, seq_done
+    if side== 'left' and awaiting == False:
         uart.writeCmdBuffered(SEQUENCE[seq_step][0],SEQUENCE[seq_step][1])
         awaiting = True
         seq_step += 1
-        if seq_step == len(SEQUENCE): space_found = False
+        if seq_step == len(SEQUENCE): 
+            # now_parking = False
+            seq_done = True
 
 
+def align():
+    global now_parking, seq_done
+    print('Aligning...')
+    # if driver.frontDistance() < 20.0 and driver.rearDistance() <20.0:
+    error = driver.frontDistance() - driver.rearDistance()
+    if abs(error)>3.0:
+        driver.speed(error*20.0)
+    else:
+        print('Aligning done!')
+        now_parking = False
+        seq_done = False
+        driver.speed(0)
+        driver.setSpeedLimit(0)
+        return

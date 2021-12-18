@@ -23,7 +23,7 @@ import camera_calibration
 import utils
 import lane_finder_module
 import web_app_module as app
-import img_recognition_module as recognition
+import object_detection_module as detection
 import driver_module as driver
 import uart_module as uart
 import auto_parking_module as parking
@@ -33,7 +33,7 @@ import jetson.utils
 REMOTE_DESKTOP = False
 FOLLOW_LANE = False
 SIGN_RECOGNITION = False
-AUTO_PARK = False
+AUTO_PARK = True
 MANUAL_MODE = True
 
 threads = []
@@ -83,7 +83,7 @@ def videoLoop():
         jetson.utils.cudaResize(frameGPU,frameGPU_small)
         jetson.utils.cudaConvertColor(frameGPU_small, frameGPU_bgr_small)
         if SIGN_RECOGNITION:
-            recognition.detectSigns(frameGPU_small)
+            detection.detectSigns(frameGPU_small)
         jetson.utils.cudaDeviceSynchronize()
         frameNp_small = jetson.utils.cudaToNumpy(frameGPU_bgr_small)
 
@@ -106,10 +106,11 @@ def imageProcessing(img_in):
         left_line, center_line, right_line = lane_finder_module.getLanePoints(img_undist)
         warped = lane_finder_module.warped_img.copy()
         mask = lane_finder_module.hsv_mask.copy()
-        avg_angle = lane_finder_module.getCurveAngle(center_line)
-        # middle_error = warped.shape[1]//2 - center_line[0]
-        if center_line.any() and avg_angle:
-            center_offset = steering(avg_angle,center_line[0][0],warped.shape[1]//2)
+        if FOLLOW_LANE:
+            avg_angle = lane_finder_module.getCurveAngle(center_line)
+            # middle_error = warped.shape[1]//2 - center_line[0]
+            if center_line.any() and avg_angle:
+                center_offset = steering(avg_angle,center_line[0][0],warped.shape[1]//2)
 
         utils.drawLaneLine(warped,left_line,color=(0,0,255))
         utils.drawLaneLine(warped,center_line,color=(255,0,0))
@@ -140,12 +141,12 @@ def imageProcessing(img_in):
         
         # cv2.line(warped,(int(warped.shape[1]/2),warped.shape[0]),(int(warped.shape[1]/2),warped.shape[0]-50),(255,0,0),2)
         #if right turn is detected keep to the left and respectively                
-        if FOLLOW_LANE:
-            driver.speed(100.0)
-            driver.turn(disalignment)
+        # if FOLLOW_LANE:
+        #     driver.speed(100.0)
+        #     driver.turn(disalignment)
         driver.requestTelemetry()           
 
-        img_list = [recognition.getVisual(),img_undist,warped, mask]
+        img_list = [detection.getVisual(),img_undist,warped, mask]
         app.emitFrames(img_list,0.6)
 
 def steering(avg_angle, first_center, img_middle):
@@ -170,11 +171,13 @@ def parseResponse(res):
         if "speed" in res_dict:
             app.json_dict["current_speed"]=res_dict["speed"]
             parking.setSpeed(res_dict["speed"])
-            if res_dict["pos_reg"] == 0:
+            if res_dict["pos_reg"] == 0 and parking.awaiting == True:
+                print('DONE')
                 parking.awaiting = False
 
         if "sensors" in res_dict:
             app.json_dict["sensors"]=res_dict["sensors"]
+            driver.sensors = res_dict["sensors"]
             if AUTO_PARK and parking.space_mapping:
                 parking.update(res_dict["sensors"])
             #     driver.speed(0.0)
@@ -216,7 +219,7 @@ def parseEventMsg(channel,data):
 if __name__ == "__main__":
     global net
     if SIGN_RECOGNITION:
-        recognition.init()
+        detection.init()
 
     camera_calibration.import_calib(640)
 
@@ -232,7 +235,8 @@ if __name__ == "__main__":
     app.emitDataToApp()
     for thread in threads:
         thread.start()
-    
+    if AUTO_PARK:
+        parking.enable()
     videoLoop()
     driver.speed(0)
 

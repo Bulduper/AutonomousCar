@@ -13,27 +13,27 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <a class="navbar-brand" href="#">Teaching platform</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav">
-            <li class="nav-item active">
-              <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/settings">Settings</a>
-            </li>
-          </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/">Home</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/settings">Settings <span class="sr-only">(current)</a>
+                </li>
+            </ul>
         </div>
-      </nav>
+    </nav>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
         integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
         crossorigin="anonymous"></script>
     <!-- static downloaded script when no internet -->
     <!-- <script src="{{ url_for('static', filename='socket_io.js')}}" type="text/javascript" charset="utf-8"></script> -->
 
-    <h3 id="fps_counter">0 FPS</h3>
     <div class="container my-3">
         <div class="row">
             <div class="col-3 px-0">
@@ -53,12 +53,12 @@
                 <button type="button" class='eventBtn' id="captureImg4">Capture image</button>
             </div>
         </div>
-        
+
 
     </div>
     <div class="container my-3">
         <div class="row">
-            <div class="col">
+            <div class="col mx-3">
                 <div class="row">
                     <button type="button" class='eventBtn' id="follow_lane">Follow the lane</button>
                 </div>
@@ -72,33 +72,52 @@
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" id="signDetectorSwitch">
                         <label class="form-check-label" for="signDetectorSwitch">Sign detector</label>
-                      </div>
+                    </div>
                 </div>
-                <div class="row bg-light">
+                <div class="row">
                     <h4 id="current_speed">Current speed: - mm/s</h4>
                     <h4 id="current_angle">Angle: - deg</h4>
                     <h4 id="current_mode">Mode: </h4>
                     <h4 id="current_voltage">LiPo voltage: </h4>
                 </div>
+
                 <div class="row">
-                    <label for="targetSpeedRange" class="form-label">Target speed: <span id="targetSpeedVal">0</span></label>
+                    <label for="targetSpeedRange" class="form-label">Target speed: <span
+                            id="targetSpeedVal">0</span></label>
                     <input type="range" class="form-range" id="targetSpeedRange" min="-150" max="150" value="0">
-                    <label for="targetTurnRange" class="form-label">Target turn: <span id="targetTurnVal">0</span></label>
+                    <label for="targetTurnRange" class="form-label">Target turn: <span
+                            id="targetTurnVal">0</span></label>
                     <input type="range" class="form-range" id="targetTurnRange" min="-60" max="60" value="0">
                 </div>
+
             </div>
-            <div class="col top-view">
-                <object data="{{ url_for('static', filename='top_view_sensors.svg')}}" type="image/svg+xml"
-                id="alphasvg" width="70%"></object>
+
+            <div class="col mx-3">
+
+                <div class="row">
+                    <h5>Speed regulator PID rates:</h5>
+                    <label for="speedPRange" class="form-label">P (proportional): <span id="speedPVal">0</span></label>
+                    <input type="range" class="form-range" id="speedPRange" min="0" max="1" value="0" step="0.01">
+                    <label for="speedIRange" class="form-label">I (integral): <span id="speedIVal">0</span></label>
+                    <input type="range" class="form-range" id="speedIRange" min="0" max="0.002" value="0" step="0.00001">
+                    <label for="speedDRange" class="form-label">D (derivative): <span id="speedDVal">0</span></label>
+                    <input type="range" class="form-range" id="speedDRange" min="0" max="10" value="0" step="0.1">
+                    <h5>Position regulator PID rates:</h5>
+                    <label for="positionPRange" class="form-label">P (proportional): <span id="positionPVal">0</span></label>
+                    <input type="range" class="form-range" id="positionPRange" min="0" max="50" value="0" step="1">
+                    <h5>Speed limit:</h5>
+                    <label for="speedLimitRange" class="form-label">Speed limit [mm/s]: <span id="speedLimitVal">0</span></label>
+                    <input type="range" class="form-range" id="speedLimitRange" min="0" max="180" value="0" step="1">
+                </div>
             </div>
+
+
         </div>
 
-    </div>
-
-    <script src="{{ url_for('static', filename='script_io.js')}}" type="text/javascript" charset="utf-8"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
-        crossorigin="anonymous"></script>
+        <script src="{{ url_for('static', filename='script_io.js')}}" type="text/javascript" charset="utf-8"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+            crossorigin="anonymous"></script>
 </body>
 
 </html>

@@ -6,17 +6,26 @@ let dataOutUpdated = false;
 for(btn of document.getElementsByClassName('eventBtn')){
     btn.addEventListener('click', buttonPressedEmit);
 }
-
-document.getElementById('speed_slider').addEventListener('input',function(){
-    document.getElementById("target_speed_val").innerText = this.value;
-    dataOut["target_speed"]=this.value;
-    dataOutUpdated = true;
-});
-document.getElementById('angle_slider').addEventListener('input',function(){
-    document.getElementById("target_angle_val").innerText = this.value;
-    dataOut["target_angle"]=this.value;
-    dataOutUpdated = true;
-});
+for(range of document.getElementsByClassName('form-range')){
+    range.addEventListener('input',function(event){
+        const rangeID = event.srcElement.id;
+        const valID = rangeID.replace('Range','Val');
+        const varName = rangeID.replace('Range','');
+        document.getElementById(valID).innerText = this.value;
+        dataOut[varName]=this.value;
+        dataOutUpdated = true;
+    })
+}
+// document.getElementById('speed_slider').addEventListener('input',function(){
+//     document.getElementById("target_speed_val").innerText = this.value;
+//     dataOut["target_speed"]=this.value;
+//     dataOutUpdated = true;
+// });
+// document.getElementById('angle_slider').addEventListener('input',function(){
+//     document.getElementById("target_angle_val").innerText = this.value;
+//     dataOut["target_angle"]=this.value;
+//     dataOutUpdated = true;
+// });
 
 document.getElementById('signDetectorSwitch').addEventListener('change',function(){
     
@@ -37,9 +46,6 @@ function buttonPressedEmit(event){
     socket.emit('buttonPressed',buttonId);
 }
 
-function sliderUpdate(){
-    console.log("Hello")
-}
 
 
 socket.on('connect', function() {
@@ -52,8 +58,13 @@ socket.on('robot_info', function(msg){
     console.log(msg);
     let cur_speed = msg.current_speed;
     let cur_angle = msg.angle;
+    const voltage = msg.voltage;
+    const mode = msg.mode;
+
     document.getElementById('current_speed').innerText = 'Current speed: '+ cur_speed + " mm/s";
     document.getElementById('current_angle').innerText = 'Angle: ' + cur_angle + " deg";
+    document.getElementById('current_voltage').innerText = 'LiPo voltage: ' + voltage + " V";
+    document.getElementById('speedPRange').value = msg.speed_p;
     if(msg.sensors){
         animateRobotView(msg.sensors)
     }

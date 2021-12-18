@@ -66,6 +66,9 @@ def handle_message(data):
 def index():
     return render_template('index_all_io.html')
 
+@app.route('/settings', methods=['GET','POST'])
+def settings():
+    return render_template('settings.html')
 # @app.route('/video1')
 # def video_feed_1():
 #     return Response(makeFrame(),
