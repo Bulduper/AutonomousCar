@@ -33,17 +33,14 @@ def receiveAsync():
         #return received
     #return None
 
-#every 10ms try to send oldest record (command) from ordered dict
+#every 100ms try to send oldest record (command) from ordered dict
 def loop():
     while True:
         receiveAsync()
         sendFromQueue()
-        time.sleep(0.01)
+        time.sleep(0.1)
 
-# def setOnReceived(func):
-#     global on_received
-#     on_received = func
-
+#send the latest command from queue
 def sendFromQueue():
     if len(dict_queue)!=0:
         key,value = dict_queue.popitem(last=False)

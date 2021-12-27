@@ -5,17 +5,20 @@ import base64
 import cv2
 import time 
 import json
+
 socketio = SocketIO(message_queue='redis://localhost:7777')
 r= redis.Redis(host='localhost', port=7777, db=0)
 ps = r.pubsub()
 ps.subscribe('settings')
 ps.subscribe('capture')
-ps.subscribe('mode')
+ps.subscribe('event')
 
 #data from App parsing frequency
 parse_freq = 5.0
 
 json_dict = dict()
+
+requestedImgKeys = []
 
 def encodeFrame(frame):
     # frame= cv2.resize(frame, (0,0), fx=0.5, fy=0.5)
@@ -35,6 +38,16 @@ def emitDataToApp():
     emit('robot_info',json_dict)
     threading.Timer(0.2,emitDataToApp).start()
 
+def emitImages(imgDict, scale=1.0):
+    imagesToSend = dict()
+    for imgKey in imgDict.keys():
+        if imgKey in requestedImgKeys:
+            imgDict[imgKey] = cv2.resize(imgDict[imgKey], (0, 0), None, scale, scale)
+            imagesToSend[imgKey] = encodeFrame(imgDict[imgKey])
+        else:
+            imagesToSend[imgKey]=None
+    if imagesToSend: emit('images',imagesToSend)
+    
 def listenForEvents(func_on_event):
     message = ps.get_message()
     #ignore first 'subscribed' message

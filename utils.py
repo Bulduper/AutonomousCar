@@ -99,6 +99,9 @@ def drawCircle(img, points):
     for p in points:
         cv2.circle(img, (int(p[0] * img.shape[1]), int(p[1] * img.shape[0])), 10, (0, 255, 0), cv2.FILLED)
 
+def drawPerimiter(img,points):
+    cv2.polylines(img,np.int32([points]),True,(204, 0, 102),thickness=2)
+
 def rotateImg(img,degrees=180):
     center = (img.shape[1]//2, img.shape[0]//2)
     M = cv2.getRotationMatrix2D(center, degrees,scale=1.0)
@@ -114,3 +117,6 @@ def drawLaneLine(img, points, color):
 
 def drawStraightLine(img,pt1,pt2,color):
     cv2.line(img,pt1,pt2,color,2)
+
+def putText(img,string):
+    cv2.putText(img,string,(300,50),cv2.FONT_HERSHEY_SIMPLEX,1.0,(255,255,255),1,cv2.LINE_AA)

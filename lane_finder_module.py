@@ -12,7 +12,7 @@ warp_distorted_values = [0.51,0.61,1.21,.81]
 hsvTrackbarValues = [100,134,80,255,100,255]
 
 #IMAGES HALF-PRODUCT
-global warped_img, hsv_mask, debug_img
+global warped_img, hsv_mask, debug_img, undist_plot
 
 def init():
     warpTrackBarValues = warp_undistorted_values
@@ -22,7 +22,7 @@ def init():
     utils.initHSVTrackbars(hsvTrackbarValues)
 
 def findLines(input_img):
-    global warped_img, hsv_mask
+    global warped_img, hsv_mask, debug_img, undist_plot
     img = input_img.copy()
     #specify ROI using some sliders
     #WARP IMAGE TO BIRD'S EYE VIEW
@@ -31,14 +31,13 @@ def findLines(input_img):
     #warp_points_rel = [x*100.0 for x in warp_undistorted_values]
     warped_img = utils.perspective_warp(img,warp_points_rel,dstSize=(img.shape[1],img.shape[0]))
     #from relative to absolute
-    warp_points = np.empty_like(warp_points_rel)
-    #size = np.flip(warped_img.shape[:2],1)
-    # size = np.array([warped_img.shape[1],warped_img.shape[0]])
-    # #print(size, warp_points_rel[1])
-    # for i,pt_rel in enumerate(warp_points_rel):
-    #     warp_points[i]=[a*b for a,b in zip(size,pt_rel)]
-    # print(warp_points_rel,warp_points)
-    utils.drawCircle(img,warp_points_rel)
+    warp_points = [[p[0]*img.shape[1],p[1]*img.shape[0]] for p in warp_points_rel]
+    #swap points to draw trapezoid later
+    warp_points[2], warp_points[3] = warp_points[3], warp_points[2]
+    warp_points = np.array([warp_points])
+
+    utils.drawPerimiter(img,warp_points)
+    undist_plot = img.copy()
 
     #HSV mask to find the lane lines
     hsv_mask = utils.hsvThreshold(warped_img,defaultHSV=hsvTrackbarValues)
@@ -75,7 +74,7 @@ def getLanePoints(input_img):
     
     #THERE IS A PROBLEM WITH TOO MANY ROWS -> at some point line can become horizontal and thus the whole algorithm stops working properly
     #rows * window_height is how far (in px) we look at the lane
-    rows = 10
+    rows = 5
     #line detection threshold (empirically obtained) (dependent on blackman window width)
     detection_threshold = 20000
     #for each row

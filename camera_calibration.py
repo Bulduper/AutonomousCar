@@ -12,6 +12,7 @@ objpoints = [] # 3d point in real world space
 imgpoints = [] # 2d points in image plane.
 images = glob.glob('./img/*.jpg')
 
+#find chessboard pattern and list it
 def find_chessboard(img, draw = True, calibrate = False):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     global shape
@@ -29,6 +30,7 @@ def find_chessboard(img, draw = True, calibrate = False):
             # cv2.putText(img,str(len(objpoints)),(shape[0]/2,shape[1]/2),cv2.FONT_HERSHEY_SIMPLEX,2,(255,255,255))
     return img
 
+#create calibration matrices and params according to collected data (export it to file optionally)
 def calibrate(export=False):
     if len(objpoints)==0 or len(imgpoints)==0:
         print('No data to calibrate')
@@ -48,6 +50,8 @@ def calibrate(export=False):
         np.save(f'./calib_data/tvecs_{shape[0]}.npy',tvecs)
         print('CALIBRATION FILES EXPORTED')
 
+#import calibration arrays (matrices) from ./calib_data folder
+#for a specific img width (by deafult 640px)
 def import_calib(img_width=640):
     global ret, mtx, dist, rvecs, tvecs, mapx, mapy
     ret = np.load(f'./calib_data/ret_{img_width}.npy')
@@ -59,7 +63,7 @@ def import_calib(img_width=640):
     mapx, mapy = cv2.initUndistortRectifyMap(mtx, dist, None, mtx, (img_width,480), 5)
     return ret, mtx, dist, rvecs, tvecs
 
-
+#remove radial/tangential distortions
 def undistort(img, alpha=1.0):
     global ret, mtx, dist, rvecs, tvecs, mapx, mapy
     h,  w = img.shape[:2]
@@ -69,6 +73,7 @@ def undistort(img, alpha=1.0):
     # undist = cv2.undistort(img, mtx, dist, None)
     #### cv2.remap MORE EFFICIENT,  requires mapx, mapy = cv2.initUndistortRectifyMap() on init
     undist = cv2.remap(img, mapx, mapy, cv2.INTER_LINEAR)
+    # undist = img
 
     #In case of different size image
     #newcameramtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, (1640, 1232), alpha)

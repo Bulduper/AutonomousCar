@@ -1,6 +1,5 @@
 import queue
 
-from cv2 import threshold
 import driver_module as driver
 import time
 import uart_module as uart
@@ -17,8 +16,9 @@ gap_found_right= False
 resolution=3
 #how far back will the measurements be remembered [cm]
 along_dist = 60
-#depth of parking space in cm
+#depth threshold of parking space in cm
 depth_thr = 20
+#length threshold of parking space in cm
 length_thr = 35
 
 left_map = queue.Queue(along_dist/resolution)
@@ -32,12 +32,13 @@ driving_speed = 0.0
 interval_default = 1.0
 space_found = False
 awaiting = False
-
+#parking sequence by command
 SEQUENCE = [('s',100),('P',200), ('T',60), ('P',-300), ('T',-60), ('P',-300), ('T',0)]
+#current sequence step
 seq_step = 0
-
+#sequence complete?
 seq_done = False
-
+#parking procedure started?
 now_parking = False
 
 def enable():
@@ -54,27 +55,28 @@ def update(dist_list):
     # print(dist_list[4],dist_list[1])
     # print(dist_list[5],dist_list[2])
     # print("----------------")
+    #if queue is full - all 'along_dist' is scanned
     if left_map.full():
+        #pull the oldest measurements
         left_map.get()
         right_map.get()
+    #push new measurements
     left_map.put(dist_list[4])
     right_map.put(dist_list[1])
-    # for item in list(left_map.queue):
-    #     print(item)
-    # #print(list(left_map.queue))
-    # print('############################')
+    #if it's said we want automatically park on found space and the parking is not performed already
     if find_and_park and not now_parking:
+        #check for free space
         findParkingSpace(dist_list[4],dist_list[1])
-
+#set speed for calculations
 def setSpeed(speed):
     global driving_speed,space_mapping
     driving_speed = speed/10.0
 
-
+#main loop
 def loop():
     global interval_default,space_mapping, gap_found_right, gap_found_left
     while True:
-        driver.requestEnvironment()
+        driver.requestDistance()
         if module_enabled:
             if driving_speed==0.0:
                 space_mapping = False
@@ -123,8 +125,6 @@ def findParkingSpace(left_depth, right_depth):
         if find_right: now_parking=True
     return gap_found_right, gap_found_left
 
-
-
 def parkSequence(side):
     global now_parking, awaiting, seq_step, SEQUENCE, seq_done
     if side== 'left' and awaiting == False:
@@ -135,11 +135,10 @@ def parkSequence(side):
             # now_parking = False
             seq_done = True
 
-
+#align between front and rear obstacle (equal distance)
 def align():
     global now_parking, seq_done
     print('Aligning...')
-    # if driver.frontDistance() < 20.0 and driver.rearDistance() <20.0:
     error = driver.frontDistance() - driver.rearDistance()
     if abs(error)>3.0:
         driver.speed(error*20.0)

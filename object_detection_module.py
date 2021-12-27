@@ -12,7 +12,7 @@ def init():
 
 def detectSigns(cuda_img):
     global net, working
-    detections= net.Detect(cuda_img,640,480)
+    detections= net.Detect(cuda_img,cuda_img.width,cuda_img.height)
     jetson.utils.cudaConvertColor(cuda_img, frameGPU_bgr_small_detection)
     working = True
     for detect in detections:
@@ -21,6 +21,6 @@ def detectSigns(cuda_img):
         print(item)
 
 def getVisual():
-    if working:
-        return jetson.utils.cudaToNumpy(frameGPU_bgr_small_detection)
+    # if working:
+    #     return jetson.utils.cudaToNumpy(frameGPU_bgr_small_detection)
     return np.zeros((480,640,3),dtype=np.uint8)

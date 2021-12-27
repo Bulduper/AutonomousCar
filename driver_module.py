@@ -16,9 +16,9 @@ def setSpeedLimit(limit):
 
 def position(rel_position_mm):
     uart.writeCmdBuffered("P",rel_position_mm)
-    
-def requestEnvironment(samples=1):
-    #stm32.write("E{0}".format(samples).encode())
+
+#request distance measurements, average of {sample} samples
+def requestDistance(samples=1):
     uart.writeCmdBuffered("E",samples)
 
 def requestTelemetry():
@@ -37,3 +37,8 @@ def rearDistance():
     global sensors
     if sensors:
         return min(sensors[2],sensors[5])
+
+def checkForObstacles(trigger):
+    if frontDistance() < trigger: return 'front'
+    elif rearDistance() <trigger: return 'rear'
+    return 'none' 

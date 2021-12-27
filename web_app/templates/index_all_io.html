@@ -11,85 +11,112 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-5">
         <a class="navbar-brand" href="#">Teaching platform</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav">
-            <li class="nav-item active">
-              <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/settings">Settings</a>
-            </li>
-          </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/settings">Settings</a>
+                </li>
+            </ul>
         </div>
-      </nav>
+    </nav>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
         integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
         crossorigin="anonymous"></script>
     <!-- static downloaded script when no internet -->
     <!-- <script src="{{ url_for('static', filename='socket_io.js')}}" type="text/javascript" charset="utf-8"></script> -->
 
-    <h3 id="fps_counter">0 FPS</h3>
     <div class="container my-3">
         <div class="row">
+            {%for i in range(1,5)%}
             <div class="col-3 px-0">
-                <img id="image1" class="img-fluid">
-                <button type="button" class='eventBtn' id="captureImg1">Capture image</button>
+                <img id="image{{i}}" class="img-fluid" src="{{ url_for('static', filename='unavailable.jpg')}}">
+                <div class="row">
+                    <div class="col">
+                        <label class="form-select-label" for="image{{i}}Select">Select frame</label>
+                    </div>
+                    <div class="col">
+                        <select class="form-select" label="Select frame" id=image{{i}}Select>
+                            <option selected>None</option>
+                        </select>
+                    </div>
+                    <div class="col">
+                        <button type="button" class='eventBtn' id="image{{i}}CaptureBtn">Capture</button>
+                    </div>
+                </div>
             </div>
-            <div class="col-3 px-0">
-                <img id="image2" class="img-fluid">
-                <button type="button" class='eventBtn' id="captureImg2">Capture image</button>
-            </div>
-            <div class="col-3 px-0">
-                <img id="image3" class="img-fluid">
-                <button type="button" class='eventBtn' id="captureImg3">Capture image</button>
-            </div>
-            <div class="col-3 px-0">
-                <img id="image4" class="img-fluid">
-                <button type="button" class='eventBtn' id="captureImg4">Capture image</button>
-            </div>
+            {%endfor%}
         </div>
-        
+
 
     </div>
     <div class="container my-3">
         <div class="row">
             <div class="col">
                 <div class="row">
-                    <button type="button" class='eventBtn' id="follow_lane">Follow the lane</button>
-                </div>
-                <div class="row">
-                    <button type="button" class='eventBtn' id="park">Parking mode</button>
-                </div>
-                <div class="row">
-                    <button type="button" class='eventBtn' id="manual">Manual mode</button>
-                </div>
-                <div class="row">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="signDetectorSwitch">
-                        <label class="form-check-label" for="signDetectorSwitch">Sign detector</label>
-                      </div>
+                    <div class="col-6">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="followLaneSwitch">
+                            <label class="form-check-label" for="followLaneSwitch">Follow lane</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="signDetectorSwitch">
+                            <label class="form-check-label" for="signDetectorSwitch">Sign detector</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="parkingSwitch">
+                            <label class="form-check-label" for="parkingSwitch">Parking mode</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="obstacleAvoidanceSwitch">
+                            <label class="form-check-label" for="obstacleAvoidanceSwitch">Obstacle avoidance</label>
+                        </div>
+   
+                    </div>
+                    <div class="col-6 d-flex ">
+                        <button type="button" class='eventBtn btn-primary flex-fill w-50' id="goBtn">GO</button>
+                        <button type="button" class='eventBtn btn-secondary flex-fill w-50' id="stopBtn">STOP</button> 
+                    </div>
                 </div>
                 <div class="row bg-light">
+                    <h6 style="text-align: center;color: slategrey;">INFO</h6>
+                    <h4 id="fps">- FPS</h4>
                     <h4 id="current_speed">Current speed: - mm/s</h4>
                     <h4 id="current_angle">Angle: - deg</h4>
                     <h4 id="current_mode">Mode: </h4>
                     <h4 id="current_voltage">LiPo voltage: </h4>
                 </div>
                 <div class="row">
-                    <label for="targetSpeedRange" class="form-label">Target speed: <span id="targetSpeedVal">0</span></label>
-                    <input type="range" class="form-range" id="targetSpeedRange" min="-150" max="150" value="0">
-                    <label for="targetTurnRange" class="form-label">Target turn: <span id="targetTurnVal">0</span></label>
-                    <input type="range" class="form-range" id="targetTurnRange" min="-60" max="60" value="0">
+                    <label for="targetSpeedRange" class="form-label">Target speed: <span
+                            id="targetSpeedVal">0</span></label>
+                    <div class="col-10">
+                        <input type="range" class="form-range" id="targetSpeedRange" min="-150" max="150" value="0">
+                    </div>
+                    <div class="col-2">
+                        <button type="button" class="resetBtn" id=resetTargetSpeed>RESET</button>
+                    </div>
+
+                    <label for="targetTurnRange" class="form-label">Target turn: <span
+                            id="targetTurnVal">0</span></label>
+                    <div class="col-10">
+                        <input type="range" class="form-range" id="targetTurnRange" min="-60" max="60" value="0">
+                    </div>
+                    <div class="col-2">
+                        <button type="button" class="resetBtn" id=resetTargetTurn>RESET</button>
+                    </div>
                 </div>
             </div>
             <div class="col top-view">
                 <object data="{{ url_for('static', filename='top_view_sensors.svg')}}" type="image/svg+xml"
-                id="alphasvg" width="70%"></object>
+                    id="alphasvg" width="70%"></object>
             </div>
         </div>
 

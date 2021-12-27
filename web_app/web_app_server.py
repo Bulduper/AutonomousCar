@@ -22,30 +22,18 @@ x=3
 
 emiting_period = 0.5
 
-@socketio.on('mode')
+@socketio.on('event')
 def onModeEvent(data):
     #assuming type of data is string (stringified JSON)
     if data:
-        r.publish('mode',data)
-
-@socketio.on('buttonPressed')
-def onButtonPressed(data):
-    if data:
-        r.publish('buttonPressed',data)
-
-@socketio.on('target_speed')
-def target_speed(data):
-    r.set("target_speed",data)
+        r.publish('event',data)
 
 
-@socketio.on('target_angle')
-def target_angle(data):
-    r.set("target_angle",data)
-
-@socketio.on('my event')
-def handle_message(data):
+@socketio.on('connection')
+def connection(data):
     global x
     print('received message: ' + str(data))
+    # r.publish('event', {'connected': true})
     # while True:
     #     json_dict['speed']=x*3
     #     json_dict['angle']=x+5 
