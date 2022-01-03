@@ -226,7 +226,8 @@ def parseEventMsg(channel,data):
         driver.speed(0)
     if 'requestedImgs'in data:
         app.requestedImgKeys = data['requestedImgs']
-
+    if 'capture'in data:
+        utils.captureImg(images[data['capture']['imgKey']],'signs/'+data['capture']['imgKey'])
 
 if __name__ == "__main__":
     global net

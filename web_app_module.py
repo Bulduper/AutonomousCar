@@ -42,8 +42,8 @@ def emitImages(imgDict, scale=1.0):
     imagesToSend = dict()
     for imgKey in imgDict.keys():
         if imgKey in requestedImgKeys:
-            imgDict[imgKey] = cv2.resize(imgDict[imgKey], (0, 0), None, scale, scale)
-            imagesToSend[imgKey] = encodeFrame(imgDict[imgKey])
+            img_resized = cv2.resize(imgDict[imgKey], (0, 0), None, scale, scale)
+            imagesToSend[imgKey] = encodeFrame(img_resized)
         else:
             imagesToSend[imgKey]=None
     if imagesToSend: emit('images',imagesToSend)

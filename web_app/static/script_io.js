@@ -28,6 +28,26 @@ for(btn of document.getElementsByClassName('eventBtn')){
     });
 }
 
+for(btn of document.getElementsByClassName('captureBtn')){
+    // btn.addEventListener('click', buttonPressedEmit);
+    btn.addEventListener('click', function(event){
+        const btnID = event.srcElement.id;
+        const index = btnID.match(/\d+/)[0];
+        const selectObj = document.getElementById(`image${index}Select`)
+        if(selectObj){
+            const selectedValue = selectObj.value;
+            dataOut['capture'] = {imgKey:selectedValue};
+            dataOutUpdated = true;
+        }
+
+
+
+        const varName = btnID.replace('Btn','');
+        dataOut[varName] = {state:true};
+        dataOutUpdated = true;
+    });
+}
+
 document.getElementById('stopBtn').addEventListener('click',function(){
     document.getElementById('targetSpeedRange').value=0;
     document.getElementById('targetSpeedVal').innerText = 0;

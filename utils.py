@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import time
 from TrackBarWindow import TrackBarWindow
 
 warpingTrackbars = None
@@ -120,3 +121,9 @@ def drawStraightLine(img,pt1,pt2,color):
 
 def putText(img,string):
     cv2.putText(img,string,(300,50),cv2.FONT_HERSHEY_SIMPLEX,1.0,(255,255,255),1,cv2.LINE_AA)
+
+def captureImg(img,filename='captured/captured'):
+    print('Capturing img ./img/',filename)
+    print(time.time())
+    timestamp = int(time.time())
+    cv2.imwrite('./img/{}_{}.jpg'.format(filename, timestamp), img)
