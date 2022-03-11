@@ -8,13 +8,23 @@ import json
 
 socketio = SocketIO(message_queue='redis://localhost:7777')
 r= redis.Redis(host='localhost', port=7777, db=0)
-ps = r.pubsub()
-ps.subscribe('settings')
-ps.subscribe('capture')
-ps.subscribe('event')
+
+ps_serverToClient = r.pubsub()
+ps_serverToClient.subscribe('settings')
+ps_serverToClient.subscribe('capture')
+ps_serverToClient.subscribe('event')
+
+ps_clientToServer = r.pubsub()
+ps_clientToServer.subscribe('logs')
 
 #data from App parsing frequency
 parse_freq = 5.0
+
+#logs to Server sending frequency
+logging_freq = 100.0
+
+#other data sending frequency
+to_server_freq = 5.0
 
 json_dict = dict()
 
@@ -36,7 +46,7 @@ def emit(topic,data):
 
 def emitDataToApp():
     emit('robot_info',json_dict)
-    threading.Timer(0.2,emitDataToApp).start()
+    threading.Timer(1.0/to_server_freq,emitDataToApp).start()
 
 def emitImages(imgDict, scale=1.0):
     imagesToSend = dict()
@@ -47,9 +57,18 @@ def emitImages(imgDict, scale=1.0):
         else:
             imagesToSend[imgKey]=None
     if imagesToSend: emit('images',imagesToSend)
-    
+
+def sendLogsToServer():
+    message = ps_clientToServer.get_message()
+    if message and message['channel'].decode("utf-8")=='logs' and message['type']!='subscribe':
+        # print('Channel',message['channel'].decode("utf-8"), ' data: ',message['data'].decode("utf-8"))
+        #To investigate!
+        #If the logs come more often than this loop, msgs are piling up and it takes a lot of time to process all messages
+        emit('logs',message['data'].decode("utf-8"))
+    threading.Timer(1.0/logging_freq,sendLogsToServer).start()
+
 def listenForEvents(func_on_event):
-    message = ps.get_message()
+    message = ps_serverToClient.get_message()
     #ignore first 'subscribed' message
     if message and message['type']!='subscribe':
         # print('Event received', message)

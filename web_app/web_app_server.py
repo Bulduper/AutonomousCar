@@ -40,6 +40,8 @@ def connection(data):
     #     x+=1
     #     emit('telemetry',json_dict)
     #     socketio.sleep(0.5)
+# @socketio.on('logs')
+# def sendLogsToClient(data):
 
 # @socketio.on('get data')
 # def send_data():

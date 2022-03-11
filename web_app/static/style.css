@@ -44,3 +44,11 @@
     table-layout: fixed;
 
   }
+
+  .consoleLog{
+    background-color: black;
+    color:white;
+    font-family:'Courier New', Courier, monospace;
+    font-weight: bold;
+    font-size: small;
+  }

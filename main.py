@@ -10,8 +10,8 @@ import utils
 import lane_finder_module
 import web_app_module as app
 import object_detection_module as detection
-import driver_module as driver
-import uart_module as uart
+import driver_module_new as driver
+# import uart_module as uart
 import auto_parking_module as parking
 import jetson.utils
 
@@ -132,7 +132,7 @@ def imageProcessing(img_in):
         #draw line at the center of the screen
         utils.drawStraightLine(warped, (warped.shape[1]//2,warped.shape[0]),(warped.shape[1]//2,warped.shape[0]-30),color=(255,255,0))
         #request all the info from robot by UART
-        driver.requestTelemetry()           
+        # driver.requestTelemetry()           
         #TO DO: Optimise!
         #put images to dict
         images['warped_plot']=warped.copy()
@@ -237,14 +237,14 @@ if __name__ == "__main__":
     camera_calibration.import_calib(640)
 
     ######THREADS######
-    uart_thread = threading.Thread(target=uart.loop, daemon=True)
+    # uart_thread = threading.Thread(target=uart.loop, daemon=True)
     parking_thread = threading.Thread(target=parking.loop, daemon=True)
 
-    threads.append(uart_thread)
+    # threads.append(uart_thread)
     threads.append(parking_thread)
-
+    app.sendLogsToServer()
     app.listenForEvents(parseEventMsg)
-    uart.onReceived(parseUartReponse)
+    driver.listenContinuously(parseUartReponse)
     app.emitDataToApp()
     for thread in threads:
         thread.start()

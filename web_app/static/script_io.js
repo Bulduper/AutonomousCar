@@ -6,6 +6,9 @@ let availableImgs = [];
 var selectedImgKeys = [];
 const defaultImgKeysHome = ['detection','undistorted','mask','warped_plot']
 const defaultImgKeysSettings = ['mask','warped','undistorted_plot','None']
+
+
+const consoleLogHome = document.getElementById('consoleLogHome');
 // window.onload = function(){
 //     console.log(window.location.pathname);
 //     if(window.location.href=='/'){
@@ -56,6 +59,8 @@ document.getElementById('goBtn').addEventListener('click',function(){
     document.getElementById('targetSpeedRange').value=150;
     document.getElementById('targetSpeedVal').innerText = 150;
 });
+
+
 
 for(swtch of document.getElementsByClassName('form-check-input')){
     swtch.addEventListener('change', function(event){
@@ -155,7 +160,10 @@ function buttonPressedEmit(event){
     socket.emit('buttonPressed',buttonId);
 }
 
-
+socket.on('logs',function(msg) {
+    // console.log('Channel logs: ',msg);
+    consoleLogHome.value = msg + '\r\n' + consoleLogHome.value;
+});
 
 socket.on('connect', function() {
     socket.emit('connection', {data: 'I\'m connected!'});

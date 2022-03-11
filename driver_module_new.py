@@ -1,8 +1,10 @@
 import json
 import threading
 import redis
+from collections import OrderedDict
 
 sensors = []
+dict_queue = OrderedDict()
 
 r= redis.Redis(host='localhost', port=7777, db=0)
 ps = r.pubsub()
@@ -58,6 +60,8 @@ def listenToUart():
 def listenContinuously(parserFunction):
     global LISTEN_FREQ
     data = listenToUart()
+    #request all the info from robot by UART
+    requestTelemetry()
     if data:
         parserFunction(data)
     threading.Timer(1.0/LISTEN_FREQ,listenContinuously,args=(parserFunction,)).start()
