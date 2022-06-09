@@ -10,7 +10,7 @@ import utils
 import lane_finder_module
 import web_app_module as app
 import object_detection_module as detection
-import driver_module_new as driver
+import driver_module as driver
 # import uart_module as uart
 import auto_parking_module as parking
 import jetson.utils

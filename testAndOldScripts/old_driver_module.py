@@ -1,5 +1,5 @@
 import time
-import uart_module as uart
+import testAndOldScripts.old_uart_module as uart
 
 global sensors
 sensors = []

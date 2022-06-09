@@ -2,7 +2,7 @@ import json
 import cv2
 import numpy as np
 import time
-from TrackBarWindow import TrackBarWindow
+from testAndOldScripts.TrackBarWindow import TrackBarWindow
 import redis
 import jetson.utils
 

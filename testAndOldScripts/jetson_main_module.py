@@ -12,8 +12,8 @@ from g_pipeline import gstreamer_pipeline
 import camera_calibration
 import utils
 import lane_detector_module
-import driver_module as driver
-import uart_module as uart
+import testAndOldScripts.old_driver_module as driver
+import testAndOldScripts.old_uart_module as uart
 import auto_parking_module as parking
 
 #net = jetson.inference.detectNet("ssd-mobilenet-v2",threshold=.7)

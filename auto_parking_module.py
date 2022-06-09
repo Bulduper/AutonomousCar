@@ -1,8 +1,8 @@
 import queue
 
-import driver_module as driver
+import testAndOldScripts.old_driver_module as driver
 import time
-import uart_module as uart
+import testAndOldScripts.old_uart_module as uart
 
 module_enabled = False
 space_mapping = True
