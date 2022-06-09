@@ -2,4 +2,3 @@ BACKGROUND
 stop_sign
 parking_sign
 speedlimit_50
-traffic_lights

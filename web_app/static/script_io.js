@@ -6,7 +6,7 @@ let availableImgs = [];
 var selectedImgKeys = [];
 const defaultImgKeysHome = ['detection','undistorted','mask','warped_plot']
 const defaultImgKeysSettings = ['mask','warped','undistorted_plot','None']
-
+const modeSwitches = document.getElementsByClassName('form-check-input');
 
 const consoleLogHome = document.getElementById('consoleLogHome');
 // window.onload = function(){
@@ -62,7 +62,7 @@ document.getElementById('goBtn').addEventListener('click',function(){
 
 
 
-for(swtch of document.getElementsByClassName('form-check-input')){
+for(swtch of modeSwitches){
     swtch.addEventListener('change', function(event){
         const swtchID = event.srcElement.id;
         const varName = swtchID.replace('Switch','');
@@ -166,7 +166,9 @@ socket.on('logs',function(msg) {
 });
 
 socket.on('connect', function() {
-    socket.emit('connection', {data: 'I\'m connected!'});
+    // socket.emit('connection', {data: 'I\'m connected!'});
+    dataOut['connected']=true;
+    dataOutUpdated = true;
     //socket.emit('check' ,{data: 'User Connected'})
 });
 
@@ -185,6 +187,12 @@ socket.on('robot_info', function(msg){
     if(msg.speed_p!=undefined)document.getElementById('speedPRange').value = msg.speed_p;
     if(msg.sensors!=undefined){
         animateRobotView(msg.sensors)
+    }
+
+    if(msg.state!=undefined){
+        for(const stateKey in msg.state){
+            document.getElementById(stateKey + 'Switch').checked = msg.state[stateKey];
+        }
     }
 });
 

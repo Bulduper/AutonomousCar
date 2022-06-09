@@ -101,3 +101,24 @@ pip3 install redis
 I had an 'Command "python setup.py egg_info" failed with error code 1 in /tmp/pip-build-pw6uuudq/wrapt/' error
 I solved it with pip3 install --upgrade setuptools
 
+
+--------detectNet------------
+detectnet tends to crash when input video resolution is too high and framerate is too high
+640x480 3fps ok
+640x480 30fps ok
+1280x720 3fps +-
+1280x720 30fps nok
+
+Almost after every successful run of detection - on another try there is EOS error 
+and kill of process& gstreamer svc restet is reqired
+
+PULLING VIDEO STREAM FROM MORE THAN 1 PROCESSES ENDS WITH ERROR!
+
+Apparently the detection works the best (best detection accuracy and object distance)
+If the image is not resized from 1640x1232 to 640x480, but when the detection gets 640x480 directly
+
+Image cropping - makes huge difference when it comes to decetion distance.
+I found (x_min, y_min, x_max, y_max) = (0.2*w, 0.5*h, 0,8*w, 0.7*h) to work well (relative to 1640x1232 resolution).
+
+
+

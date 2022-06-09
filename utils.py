@@ -1,7 +1,10 @@
+import json
 import cv2
 import numpy as np
 import time
 from TrackBarWindow import TrackBarWindow
+import redis
+import jetson.utils
 
 warpingTrackbars = None
 hsvTrackbars = None
@@ -114,7 +117,7 @@ def rotateImg(img,degrees=180):
 
 def drawLaneLine(img, points, color):
     for p in points:
-        cv2.circle(img,p,5,color,cv2.FILLED)
+        cv2.circle(img,tuple(p),5,color,cv2.FILLED)
 
 def drawStraightLine(img,pt1,pt2,color):
     cv2.line(img,pt1,pt2,color,2)
@@ -127,3 +130,51 @@ def captureImg(img,filename='captured/captured'):
     print(time.time())
     timestamp = int(time.time())
     cv2.imwrite('./img/{}_{}.jpg'.format(filename, timestamp), img)
+
+#roi should be an array of relative (0;1) [x_min, y_min, x_max, y_max]
+def cropRelative(imgInput, roi: "tuple[float,float,float,float]"):
+
+    # crop_roi = (int(imgInput.width * 0.2), int(imgInput.height * 0.5),int(imgInput.width * 0.8), int(imgInput.height*0.7) )
+    abs_roi = (int(roi[0]*imgInput.width),int(roi[1]*imgInput.height),int(roi[2]*imgInput.width),int(roi[3]*imgInput.height))
+    
+    # allocate the output image, with the cropped size
+    imgOutput = jetson.utils.cudaAllocMapped(width=int(imgInput.width * (roi[2]-roi[0])),
+                                            height=int(imgInput.height*(roi[3]-roi[1])),
+                                            format=imgInput.format)
+
+    # crop the image to the ROI
+    jetson.utils.cudaCrop(imgInput, imgOutput, abs_roi)
+
+    return imgOutput
+
+class FPSCounter:
+    def __init__(self,interval=1):
+        self.start_time=time.time()
+        self.counter = 0
+        self.T = interval
+        self.fps = 0
+    
+    def getFps(self):
+        self.counter += 1
+        if (time.time() - self.start_time) > self.T:
+            self.fps = round(self.counter / (time.time() - self.start_time),1)
+            # print("FPS: ", fps)
+            self.counter = 0
+            self.start_time = time.time()
+        return self.fps
+
+
+class PrintRedis:
+    def __init__(self,host='localhost',port='7777'):
+        self.r = redis.Redis(host=host,port=port, db=0) 
+
+    def print(self,log, prefix='',broadcast=True):  
+        print(f'{prefix}: {log}')
+        if broadcast: self.r.publish('logs',f'UART: {log}')
+
+def is_json(myjson):
+    try:
+        dic = json.loads(myjson)
+    except ValueError as e:
+        return False
+    return dic

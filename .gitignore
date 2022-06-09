@@ -4,3 +4,6 @@
 /__pycache__
 /env
 .git-old
+*.engine
+starting_script.sh
+/web_app/__pycache__

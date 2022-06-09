@@ -18,24 +18,27 @@ import jetson.utils
 #Mode variables
 REMOTE_DESKTOP = False
 FOLLOW_LANE = False
-SIGN_DETECTION = False
+SIGN_DETECTION = True
+RESPECT_SIGNS = True
 AUTO_PARK = False
 OBSTACLES_AVOIDANCE = False
+UNDISTORT = False
+
+#Detection ROI
+det_roi_x = (0.2,0.8)
+det_roi_y = (0.5,0.7)
 
 #threading variables
 threads = []
 lock = threading.Lock()
 
 #jetson.utils CUDA image variables
-frameGPU = jetson.utils.cudaAllocMapped(width=1640, height=1232, format='rgb8')
-frameGPU_bgr_small = jetson.utils.cudaAllocMapped(width=640, height=480, format='bgr8')
-frameGPU_small = jetson.utils.cudaAllocMapped(width=640, height=480, format='rgb8')
+frameCuda = jetson.utils.cudaAllocMapped(width=1640, height=1232, format='rgb8')
+frameCudaRedBgr = jetson.utils.cudaAllocMapped(width=640, height=480, format='bgr8')
+frameCudaRed = jetson.utils.cudaAllocMapped(width=640, height=480, format='rgb8')
 
-#fps counter vars
-start_time = time.time()
-counter = 0
-#period for fps calculation [s]
-T=1
+
+fps = utils.FPSCounter(1)
 
 # camera=None
 # display = None
@@ -45,105 +48,22 @@ images = dict()
 
 #initiate camera&display using jetson.utils (alternatively openCV with proper GStreamer pipeline can be used)
 def cameraInit():
-    global camera
+    global camera, display
     camera = jetson.utils.videoSource("csi://0", argv=["--input-height=1232", "--input-width=1640",
                                     "--framerate=30", "--flip-method=rotate-180"])      # '/dev/video0' for V4L2
     display = jetson.utils.videoOutput(
     "display://0", argv=[])  # 'my_video.mp4' for file
-    return camera, display
-#count fps or loops per second and set it as dict var every T seconds
-def fpsCount():
-    global counter, start_time
-    counter += 1
-    if (time.time() - start_time) > T:
-        fps = round(counter / (time.time() - start_time),1)
-        # print("FPS: ", fps)
-        app.json_dict['fps']=fps
-        counter = 0
-        start_time = time.time()
+    # return camera, display
 
-#fresh frame ready?
-new_frame = False
-
-#main loop
-def videoLoop():
-    global frameGPU,frameGPU_bgr_small, frameGPU_small, frameNp_small, frameNp_small_detection, new_frame
-    camera, display = cameraInit()
-    
-    while display.IsStreaming():
-        #get CUDA img
-        frameGPU = camera.Capture()
-        #resize CUDA img to 640x480
-        jetson.utils.cudaResize(frameGPU,frameGPU_small)
-        #convert colors from RGB to BGR as for openCV
-        jetson.utils.cudaConvertColor(frameGPU_small, frameGPU_bgr_small)
-        if SIGN_DETECTION:
-            time4= time.time()
-            detection.detectSigns(frameGPU_small)
-            print('Detection T: ',time.time()-time4)
-        #synchronizes GPU with CPU
-        jetson.utils.cudaDeviceSynchronize()
-        #make numpy array from small BGR CUDA img frame
-        frameNp_small = jetson.utils.cudaToNumpy(frameGPU_bgr_small)
-        new_frame = True
-        #if there is a display connected to Jetson, frames can be displayed on it 
-        if REMOTE_DESKTOP:
-            display.Render(frameGPU)
-        fpsCount()
-        time1= time.time()
-        #do the image processing with numpy array small frame
-        imageProcessing(frameNp_small)
-        # print('Img processing T: ',time.time()-time1)
-#further process numpy array frame
-def imageProcessing(img_in):
-    global frameNp_small, frameNp_undist, new_frame, frameNp_small_detection
-    global img_list
-    center_offset = 0
-    if new_frame:
-        new_frame=False
-
-        time3 = time.time()
-        #get undistorted image - VERY TIME CONSUMING!!!
-        img_undist = camera_calibration.undistort(img_in)
-        #print('Undist T: ',time.time()-time3)
-        #get lane line points
-        left_line, center_line, right_line = lane_finder_module.getLanePoints(img_undist)
-        
-        #put images to dict
-        images['raw']=img_in.copy()
-        images['undistorted']=img_undist.copy()
-        warped = lane_finder_module.warped_img.copy()
-        images['warped']=warped.copy()
-        mask = lane_finder_module.hsv_mask.copy()
-        if FOLLOW_LANE:
-            #get average curvature [deg] of the lane
-            avg_angle = lane_finder_module.getCurveAngle(center_line)
-            # middle_error = warped.shape[1]//2 - center_line[0]
-            if center_line.any() and avg_angle:
-                #display avg angle on the img
-                utils.putText(warped,"Avg lane angle: {} deg".format(round(avg_angle,0)))
-                #obtain steering (servo turn angle)
-                center_offset = steering(avg_angle,center_line[0][0],warped.shape[1]//2)
-
-        #mark line points
-        utils.drawLaneLine(warped,left_line,color=(0,0,255))
-        utils.drawLaneLine(warped,center_line,color=(255,0,0))
-        utils.drawLaneLine(warped,right_line,color=(0,255,0))
-        #draw line at the center of the screen
-        utils.drawStraightLine(warped, (warped.shape[1]//2,warped.shape[0]),(warped.shape[1]//2,warped.shape[0]-30),color=(255,255,0))
-        #request all the info from robot by UART
-        # driver.requestTelemetry()           
-        #TO DO: Optimise!
-        #put images to dict
-        images['warped_plot']=warped.copy()
-        images['mask']=mask.copy()
-        images['detection']=detection.getVisual()
-        images['undistorted_plot'] = lane_finder_module.undist_plot.copy()
-        img_list = [detection.getVisual(),img_undist,warped, mask, img_undist, warped,mask]
-        time2 = time.time()
-        #emit images to web app
-        app.emitImages(images,scale=0.5)
-        # print('Emiting T: ',time.time()-time2)
+def makeStateDict():
+    state_dict = dict()
+    state_dict['followLane'] = FOLLOW_LANE
+    state_dict['detectSigns'] = SIGN_DETECTION
+    state_dict['respectSigns'] = RESPECT_SIGNS
+    state_dict['parkingMode'] = AUTO_PARK
+    state_dict['avoidObstacles'] = OBSTACLES_AVOIDANCE
+    state_dict['undistort'] = UNDISTORT
+    return state_dict
 
 def steering(avg_angle, first_center, img_middle):
     #we don't neccessarily need to keep to the center of lane
@@ -160,7 +80,7 @@ def steering(avg_angle, first_center, img_middle):
     output_angle = avg_angle*b + c*middle_error
     # print('Average curvature angle',avg_angle,'center offset:',center_offset,'middle error: ', middle_error, 'output angle:', output_angle)
     
-    driver.turn(output_angle)
+    driver.setTurn(output_angle)
     return middle_error
 
 #handle response from robot
@@ -189,58 +109,152 @@ def parseUartReponse(res):
                 parking.update(res_dict["sensors"])
             if OBSTACLES_AVOIDANCE:
                 if driver.checkForObstacles(trigger=8)!='none':
-                    driver.speed(0)
-            #     driver.speed(0.0)
+                    driver.setSpeed(0)
+
 
 #handle event from web App
 def parseEventMsg(channel,data):
-    global img_list, FOLLOW_LANE, AUTO_PARK, SIGN_DETECTION,OBSTACLES_AVOIDANCE
+    global FOLLOW_LANE, AUTO_PARK, SIGN_DETECTION,OBSTACLES_AVOIDANCE,RESPECT_SIGNS, UNDISTORT
     print('parsing: ',data, 'on channel ',channel)
     if channel == 'capture':
         pass
-    # if 'connected' in data:
-    #     app.json_dict['images']=images;
+    if 'connected' in data:
+        app.json_dict['state']=makeStateDict()
     if 'targetSpeed' in data:
-        driver.speed(data['targetSpeed'])
+        driver.setSpeed(data['targetSpeed'])
     if 'targetTurn' in data:
-        driver.turn(data['targetTurn'])
+        driver.setTurn(data['targetTurn'])
     if 'speedLimit' in data:
         driver.setSpeedLimit(data['speedLimit'])
     if 'followLane' in data:
         state = data['followLane']['state']
         FOLLOW_LANE = state
-    if 'signDetection' in data:
-        state = data['signDetection']['state']
+    if 'detectSigns' in data:
+        state = data['detectSigns']['state']
         SIGN_DETECTION = state
-    if 'parking' in data:
-        state = data['parking']['state']
+    if 'respectSigns' in data:
+        state = data['respectSigns']['state']
+        RESPECT_SIGNS = state
+    if 'parkingMode' in data:
+        state = data['parkingMode']['state']
         AUTO_PARK = state
-    if 'obstacleAvoidance' in data:
-        state = data['obstacleAvoidance']['state']
+    if 'avoidObstacles' in data:
+        state = data['avoidObstacles']['state']
         OBSTACLES_AVOIDANCE = state
+    if 'undistort' in data:
+        state = data['undistort']['state']
+        UNDISTORT = state
     if 'go' in data:
         state = data['go']['state']
-        driver.speed(160)
+        driver.setSpeed(160)
     if 'stop' in data:
         state = data['stop']['state']
-        driver.speed(0)
+        driver.setSpeed(0)
     if 'requestedImgs'in data:
         app.requestedImgKeys = data['requestedImgs']
     if 'capture'in data:
         utils.captureImg(images[data['capture']['imgKey']],'signs/'+data['capture']['imgKey'])
 
+
+def getVideoFrame():
+    if display.IsStreaming():
+        #get CUDA img
+        return camera.Capture()
+
+def reduceCudaFrame(source, destination):
+    #resize CUDA img to 640x480
+    jetson.utils.cudaResize(source,destination)
+
+def cudaToNumpy(source):
+    #convert colors from RGB to BGR as for openCV
+    jetson.utils.cudaConvertColor(source, frameCudaRedBgr)
+    return jetson.utils.cudaToNumpy(frameCudaRedBgr)
+
+def detectSigns(source):
+    detections = detection.detectSigns(source)
+    detectedSignsList = []
+    for sign in detections:
+        detectedSignsList.append(detection.getClassName(sign.ClassID))
+    return detections, detectedSignsList
+
+def detectLane(source):
+    global images
+    left_line, center_line, right_line = lane_finder_module.getLanePoints(source)
+    avg_angle = lane_finder_module.getCurveAngle(center_line)
+    warped = lane_finder_module.warped_img.copy()
+    if center_line.any() and avg_angle:
+        #display avg angle on the img
+        utils.putText(warped,"Avg lane angle: {} deg".format(round(avg_angle,0)))
+
+    #mark line points
+    utils.drawLaneLine(warped,left_line,color=(0,0,255))
+    utils.drawLaneLine(warped,center_line,color=(255,0,0))
+    utils.drawLaneLine(warped,right_line,color=(0,255,0))
+    #draw line at the center of the screen
+    utils.drawStraightLine(warped, (warped.shape[1]//2,warped.shape[0]),(warped.shape[1]//2,warped.shape[0]-30),color=(255,255,0))
+
+    images['warped_plot']=warped.copy()
+
+    return center_line, avg_angle
+
+def followLane(center_line, avg_angle, img_width):
+    if center_line.any() and avg_angle:
+        #obtain steering (servo turn angle)
+        center_offset = steering(avg_angle,center_line[0][0],img_width//2)
+
+def mainLoop():
+    global frameCuda, images
+    frameCuda = getVideoFrame()
+    reduceCudaFrame(frameCuda, frameCudaRed)
+    frameNumpy = cudaToNumpy(frameCudaRed)
+    if SIGN_DETECTION:
+        # crop the original frame to a usecase specific roi
+        frameRoi = utils.cropRelative(frameCuda, (det_roi_x[0], det_roi_y[0], det_roi_x[1], det_roi_y[1]))
+        detections, detectedSigns = detectSigns(frameRoi)
+        # detections, detectedSigns = detectSigns(frameCuda)
+        driver.reactToSigns(detectedSigns)
+    
+    #synchronizes GPU with CPU
+    jetson.utils.cudaDeviceSynchronize()
+
+    #get undistorted image - VERY TIME CONSUMING!!!
+    img_undist = None
+    if UNDISTORT:
+        img_undist = camera_calibration.undistort(frameNumpy)
+
+    #get lane line points
+    if img_undist is not None:
+        center_line, avg_angle = detectLane(img_undist)
+    else:
+        center_line, avg_angle = detectLane(frameNumpy)
+
+    if FOLLOW_LANE:
+        followLane(center_line, avg_angle, frameNumpy.shape[1])
+    
+    #put images to dict
+    images['raw']=frameNumpy.copy()
+    images['warped']=lane_finder_module.warped_img.copy()
+    images['mask']=lane_finder_module.hsv_mask.copy()
+    if UNDISTORT and img_undist is not None: 
+        images['undistorted']=img_undist.copy()
+        images['undistorted_plot'] = lane_finder_module.undist_plot.copy()
+    images['detection']=detection.getVisual()
+    
+    app.json_dict['fps'] = fps.getFps()
+    #emit images to web app
+    app.emitRequestedImages(images,scale=0.5)
+
+
 if __name__ == "__main__":
-    global net
+    #optional, because it would be done automatically later anyways
     if SIGN_DETECTION:
         detection.init()
     #import calibration matrices and params from files
     camera_calibration.import_calib(640)
 
     ######THREADS######
-    # uart_thread = threading.Thread(target=uart.loop, daemon=True)
     parking_thread = threading.Thread(target=parking.loop, daemon=True)
 
-    # threads.append(uart_thread)
     threads.append(parking_thread)
     app.sendLogsToServer()
     app.listenForEvents(parseEventMsg)
@@ -250,8 +264,11 @@ if __name__ == "__main__":
         thread.start()
     if AUTO_PARK:
         parking.enable()
-    videoLoop()
-    driver.speed(0)
+    # videoLoop()
+    cameraInit()
+    while True:
+        mainLoop()
+    driver.setSpeed(0)
 
     for thread in threads:
         thread.join()

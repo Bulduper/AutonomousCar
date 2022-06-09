@@ -87,7 +87,8 @@ def emitDataPeriodically():
 
 def setFrame(img,scale=0.5):
     global frame
-    frame = cv2.resize(img,(round(img.shape[1]*scale), round(img.shape[0]*scale)))
+    # frame = cv2.resize(img,(round(img.shape[1]*scale), round(img.shape[0]*scale)))
+    frame = cv2.resize(img,320, 240)
     #with lock?
 
 def emit(topic, json):

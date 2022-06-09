@@ -45,10 +45,12 @@ def emit(topic,data):
     socketio.emit(topic,data)
 
 def emitDataToApp():
+    global json_dict
     emit('robot_info',json_dict)
+    json_dict = dict()
     threading.Timer(1.0/to_server_freq,emitDataToApp).start()
 
-def emitImages(imgDict, scale=1.0):
+def emitRequestedImages(imgDict:dict, scale=1.0):
     imagesToSend = dict()
     for imgKey in imgDict.keys():
         if imgKey in requestedImgKeys:

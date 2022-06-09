@@ -35,27 +35,33 @@
     <!-- <script src="{{ url_for('static', filename='socket_io.js')}}" type="text/javascript" charset="utf-8"></script> -->
 
     <div class="container my-3">
-        <div class="row">
+        <div class="row g-2">
             {%for i in range(1,5)%}
-            <div class="col-3 px-0">
-                <img id="image{{i}}" class="img-fluid" src="{{ url_for('static', filename='unavailable.jpg')}}">
-                <div class="row">
-                    <div class="col">
+            <div class="col-3">
+                <div class=" d-flex h-100 bg-black px-0 align-items-center">
+                    <img id="image{{i}}" class="img-fluid" src="{{ url_for('static', filename='unavailable.jpg')}}">
+                </div>
+                <!-- <img id="image{{i}}" class="img-fluid" src="{{ url_for('static', filename='test1.jpg')}}"> -->
+            </div>
+            {%endfor%}
+            {%for i in range(1,5)%}
+            <div class="col-3">
+                <div class="d-flex align-items-center">
+                    <div class="pe-2">
                         <label class="form-select-label" for="image{{i}}Select">Select frame</label>
                     </div>
-                    <div class="col">
+                    <div class="pe-3">
                         <select class="form-select" label="Select frame" id=image{{i}}Select>
                             <option selected>None</option>
                         </select>
                     </div>
-                    <div class="col">
+                    <div class="float-end">
                         <button type="button" class='captureBtn' id="image{{i}}CaptureBtn">Capture</button>
                     </div>
                 </div>
             </div>
             {%endfor%}
         </div>
-
 
     </div>
     <div class="container my-3">
@@ -68,18 +74,25 @@
                             <label class="form-check-label" for="followLaneSwitch">Follow lane</label>
                         </div>
                         <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="signDetectorSwitch">
-                            <label class="form-check-label" for="signDetectorSwitch">Sign detector</label>
+                            <input class="form-check-input" type="checkbox" id="detectSignsSwitch">
+                            <label class="form-check-label" for="detectSignsSwitch">Sign detector</label>
                         </div>
                         <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="parkingSwitch">
-                            <label class="form-check-label" for="parkingSwitch">Parking mode</label>
+                            <input class="form-check-input" type="checkbox" id="respectSignsSwitch">
+                            <label class="form-check-label" for="respectSignsSwitch">Respect signs</label>
                         </div>
                         <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="obstacleAvoidanceSwitch">
-                            <label class="form-check-label" for="obstacleAvoidanceSwitch">Obstacle avoidance</label>
+                            <input class="form-check-input" type="checkbox" id="parkingModeSwitch">
+                            <label class="form-check-label" for="parkingModeSwitch">Parking mode</label>
                         </div>
-   
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="avoidObstaclesSwitch">
+                            <label class="form-check-label" for="avoidObstaclesSwitch">Obstacle avoidance</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="undistortSwitch">
+                            <label class="form-check-label" for="undistortSwitch">Undistort</label>
+                        </div>
                     </div>
                     <div class="col-6 d-flex ">
                         <button type="button" class='eventBtn btn-primary flex-fill w-50' id="goBtn">GO</button>
