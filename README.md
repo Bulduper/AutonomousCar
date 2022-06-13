@@ -36,7 +36,7 @@ Make sure you have the CSI camera connected. Try taking a picture:
 cd
 nvgstcapture-1.0
 ```
-Then press `j` on your keyboard. Press `q` to quit.
+Then press `j` on your keyboard to save the image. Press `q` to quit.
 
 #### Copy the photo to your local machine
 ```
@@ -47,6 +47,19 @@ If your photo has an ugly pink tint and looks like this:
 Follow the instructions that lead to [UPDATING THE ISP PROFILE](https://jonathantse.medium.com/fix-pink-tint-on-jetson-nano-wide-angle-camera-a8ce5fbd797f).
 
 ### Jetson Inference
+
+This project uses a portion of the great Nvidia Jetson library - [jetson-inference](https://github.com/dusty-nv/jetson-inference) made by [dusty-nv](https://github.com/dusty-nv).
+
+The library lets you deploy DNNs on Nvidia embedded platforms. It utilises TensorRT. 
+
+The car is supposed to detect traffic signs, so I implemented object detection. The library itself is capable to do much more than that, though.
+
+There is also a side-package called jetson-utils, which is very useful for simple and efficient image processing with GPU. 
+
+I used scripts implemented in jetson-inference to: 
+- prepare test & training datasets, 
+- transfer-learn an existing DNN
+- run the detection.
 
 ### External libraries
 ```
