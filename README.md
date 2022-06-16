@@ -1,4 +1,5 @@
 # Autonomous Car Platform
+![car_1](images/car_1.png)
 ## Overview
 Welcome to the repository of an educational platform designed as an autonomous toy car. The whole project consists of mechanical design, electronics board and lots of code. The main goal was to design a platform for students who want to experience building a prototype and learn technologies like Machine Learning or Computer Vision with it.
 
@@ -33,17 +34,14 @@ Then press `j` on your keyboard to save the image. Press `q` to quit.
 
 If you run in desktop mode, open the captured picture with file explorer.
 
+If you run in headless mode, copy the captured image to your PC and view it there. [See how](#copy-files-to-your-local-machine)
+
 #### Pink tint
 If your photo has an ugly pink tint and looks like this:
 
 <img src="images/pinkTint.jpg" alt="pinkTint" width="400"/>
 
 Follow the instructions that lead to [UPDATING THE ISP PROFILE](https://jonathantse.medium.com/fix-pink-tint-on-jetson-nano-wide-angle-camera-a8ce5fbd797f).
-
-### Copy files to your local machine
-```
-scp <remote host ip>:<path/sourceFilename.xxx> <path to destination folder>
-```
 
 ### SSH - headless mode
 In order to take control over your Jetson Nano board and work in headless mode (recommended due to mobility) the SSH protocol is used. On your PC run cmd and execute `ssh <nano's ip address>`. You will be asked for the password to Jetson Nano user. You should now be able to run bash commands on your Jetson Nano remotely.
@@ -52,6 +50,10 @@ If you wish to skip password prompt everytime you connect via ssh, follow these 
 - generate key pair (public-private) on your local machine `ssh keygen`
 - copy the public key to `/home/{user}/.ssh` on the remote host
 
+### Copy files to your local machine
+```
+scp <remote host ip>:<path/sourceFilename.xxx> <path to destination folder>
+```
 
 ### Jetson Inference
 
