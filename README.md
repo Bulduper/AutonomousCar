@@ -89,6 +89,20 @@ The installation comes down to cloning this repository, but make sure you have f
 git clone https://github.com/Bulduper/AutonomousCar.git
 cd ./AutonomousCar
 ```
+## Wiring
+Nvidia Jetson Nano communicates with STM32 via UART protocol. Both processing units have separate power sources, so there are only 3 wires that need to be connected between them.
+| Jetson Nano | STM32F411 Black Pill |
+|-------------|----------------------|
+| PIN 10 (RX) | A8 (TX)              |
+| PIN 8 (TX)  | A9 (RX)              |
+| PIN 6 (GND) | GND                  |
+
+
+- Connect your camera using a ribbon cable to a CSI connector on the Jetson board.
+- Plug a WiFi dongle to a USB port (if no embedded wifi).
+- Plug a 5V/3A (or more amperes) power supply or a 5V powerbank via USB type-C connector on the board.
+- (Optional) Attach a fan to the heatsink and plug it to J7 Fan header
+
 ## Run
 Change the access permissions to UART port*.
 ```bash
