@@ -3,6 +3,10 @@
 ## Overview
 Welcome to the repository of an educational platform designed as an autonomous toy car. The whole project consists of mechanical design, electronics board and lots of code. The main goal was to design a platform for students who want to experience building a prototype and learn technologies like Machine Learning or Computer Vision with it.
 
+## Docs
+- [Image processing](docs/image_processing.md)
+- [Sign detection](docs/sign_detection.md)
+- [Dashboard](docs/dashboard.md)
 ## Features
 - Remote dashboard 
 - Object detection (road signs)
@@ -44,7 +48,7 @@ If your photo has an ugly pink tint and looks like this:
 Follow the instructions that lead to [UPDATING THE ISP PROFILE](https://jonathantse.medium.com/fix-pink-tint-on-jetson-nano-wide-angle-camera-a8ce5fbd797f).
 
 ### SSH - headless mode
-In order to take control over your Jetson Nano board and work in headless mode (recommended due to mobility) the SSH protocol is used. On your PC run cmd and execute `ssh <nano's ip address>`. You will be asked for the password to Jetson Nano user. You should now be able to run bash commands on your Jetson Nano remotely.
+In order to take control over your Jetson Nano's terminal and work in headless mode (recommended due to platform mobility) the SSH protocol is used. On your PC run cmd and execute `ssh <nano's ip address>`. You will be asked for the password to Jetson Nano user. You should now be able to run bash commands on your Jetson Nano remotely.
 
 If you wish to skip password prompt everytime you connect via ssh, follow these steps:
 - generate key pair (public-private) on your local machine `ssh keygen`
@@ -135,8 +139,16 @@ sudo mv 55-tegraserial.rules /etc/udev/rules.d/
 ```
 
 
-## Develop
-vscode ssh
+## Development
+Feel free to fork this repo and experiment with the code.
+
+### Headless - VS Code SSH
+The way I am developing&debugging this usecase is using Visual Studio Code with [SSH Remote extension](https://code.visualstudio.com/docs/remote/ssh). It is extremally useful and lets you forget that you actually write code, debug, explore filesystem and use terminal on other machine. All these goodies in the code editor that I am used to anyway.
+
+However... VS Code Server on your Jetson will use a lot of RAM (approx. 500MB, maybe more depending on running functionalities). You may experience crashes and lagging while VS Code server working, especially on running DNNs or other RAM heavy operations. In such cases you should close the VS Code window on your PC (or pause the server on Jetson - I couldn't find how to do it without permanently killing the process).
+
+### Less headless - NoMachine
+If you would like to keep your Jetson remote and mobile, but still want a desktop (GUI) access, I recommend using [NoMachine](https://www.nomachine.com/es). All you need is install NoMachine client on your PC and NoMachine server on Jetson. [Here](https://knowledgebase.nomachine.com/AR02R01074) you can find a tutorial on how to get NoMachine up and running.
 ## Optimise
 ### Disable GUI
 ### Disable redis-server autostart
