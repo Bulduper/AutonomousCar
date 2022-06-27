@@ -7,3 +7,4 @@
 *.engine
 starting_script.sh
 /web_app/__pycache__
+*/__pycache__

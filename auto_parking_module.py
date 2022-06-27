@@ -1,6 +1,6 @@
 import queue
 
-import testAndOldScripts.old_driver_module as driver
+import driver_module as driver
 import time
 import testAndOldScripts.old_uart_module as uart
 

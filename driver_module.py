@@ -52,9 +52,12 @@ def checkForObstacles(trigger):
 
 
 def listenToUart():
-    message = ps.get_message()
-    if message and message['type']!='subscribe':
-        return message['data'].decode("utf-8")
+    # message = ps.get_message()
+    message = r.get('uart')
+    # if message and message['type']!='subscribe':
+    #     return message['data'].decode("utf-8")
+    if message:
+        return message.decode("utf-8")
     return None
 
 def listenContinuously(parserFunction):
@@ -69,8 +72,11 @@ def listenContinuously(parserFunction):
 
 def reactToSigns(detectedSigns):
     if 'speedlimit_50' in detectedSigns:
-        setSpeed(50)
+        print('Driver sets speed to 50')
+        setSpeedLimit(50)
+    else: setSpeedLimit(0)
     if 'stop_sign' in detectedSigns:
+        print('Driver stops on stop sign')
         setSpeed(0)
 
 def publishKeyValue(key,value=''):

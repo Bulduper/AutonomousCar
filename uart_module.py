@@ -25,9 +25,9 @@ LOG_PUBLISH = args.logs
 stm32 = serial.Serial(
     port = '/dev/ttyTHS1',
     baudrate = 115200,
-    # bytesize = serial.EIGHTBITS,
-    # parity = serial.PARITY_NONE,
-    # stopbits = serial.STOPBITS_ONE,
+    bytesize = serial.EIGHTBITS,
+    parity = serial.PARITY_NONE,
+    stopbits = serial.STOPBITS_ONE,
     timeout = 0,
 )
 
@@ -63,7 +63,8 @@ while True:
     #Listen for received (UART)
     if stm32.inWaiting() > 0:
         received = stm32.readline()
-        r.publish('uartIn',received)
+        # r.set('uartIn',received)
+        r.set('uart',received)
         if DEBUG: log.print(f'Received: {received.decode("utf-8")}'.rstrip(),prefix='UART',broadcast=LOG_PUBLISH)
     
     #Listen for transmit (REDIS)

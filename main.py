@@ -18,7 +18,7 @@ import jetson.utils
 #Mode variables
 REMOTE_DESKTOP = False
 FOLLOW_LANE = False
-SIGN_DETECTION = True
+SIGN_DETECTION = False
 RESPECT_SIGNS = True
 AUTO_PARK = False
 OBSTACLES_AVOIDANCE = False
@@ -174,7 +174,8 @@ def detectSigns(source):
     detections = detection.detectSigns(source)
     detectedSignsList = []
     for sign in detections:
-        detectedSignsList.append(detection.getClassName(sign.ClassID))
+        #.rstrip() to crop any /r and /n if occur
+        detectedSignsList.append(detection.getClassName(sign.ClassID).rstrip())
     return detections, detectedSignsList
 
 def detectLane(source):
