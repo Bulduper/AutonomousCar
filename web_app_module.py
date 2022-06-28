@@ -3,7 +3,7 @@ import redis
 import threading
 import base64
 import cv2
-import time 
+import models
 import json
 
 socketio = SocketIO(message_queue='redis://localhost:7777')
