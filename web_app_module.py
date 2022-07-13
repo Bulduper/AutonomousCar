@@ -27,6 +27,7 @@ logging_freq = 100.0
 to_server_freq = 5.0
 
 json_dict = dict()
+prev_telemetry = dict()
 
 requestedImgKeys = []
 
@@ -49,6 +50,15 @@ def emitDataToApp():
     emit('robot_info',json_dict)
     json_dict = dict()
     threading.Timer(1.0/to_server_freq,emitDataToApp).start()
+
+def emitUpdatedDatatoApp():
+    global json_dict
+    global prev_telemetry
+    json_dict = models.getTelemetryChanges(prev_telemetry)
+    prev_telemetry = models.telemetry.copy()
+    if json_dict: emit('robot_info',json_dict)
+    threading.Timer(1.0/to_server_freq,emitUpdatedDatatoApp).start()
+
 
 def emitRequestedImages(imgDict:dict, scale=1.0):
     imagesToSend = dict()

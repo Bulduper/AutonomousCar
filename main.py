@@ -105,9 +105,9 @@ def parseUartReponse(res):
         message_type = list(res_dict)[0] 
         if message_type == 'telemetry':
             models.telemetry.update(res_dict[message_type])
-            app.json_dict["current_speed"]=models.telemetry["speed"]
-            app.json_dict["angle"] = models.telemetry["angle"]
-            app.json_dict["voltage"] = models.telemetry["bat_vol"]
+            # app.json_dict["current_speed"]=models.telemetry["speed"]
+            # app.json_dict["angle"] = models.telemetry["angle"]
+            # app.json_dict["voltage"] = models.telemetry["bat_vol"]
         if message_type == 'config':
             models.config.update(res_dict[message_type])
         if message_type == 'distance':
@@ -273,7 +273,7 @@ def mainLoop():
         images['undistorted_plot'] = lane_finder_module.undist_plot.copy()
     images['detection'] = detection.getVisual()
 
-    app.json_dict['fps'] = fps.getFps()
+    # app.json_dict['fps'] = fps.getFps()
     # emit images to web app
     app.emitRequestedImages(images, scale=0.5)
 
@@ -292,7 +292,8 @@ if __name__ == "__main__":
     app.sendLogsToServer()
     app.listenForEvents(parseEventMsg)
     driver.listenContinuously(parseUartReponse)
-    app.emitDataToApp()
+    # app.emitDataToApp()
+    app.emitUpdatedDatatoApp()
     for thread in threads:
         thread.start()
     if AUTO_PARK:

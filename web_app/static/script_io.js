@@ -175,9 +175,9 @@ socket.on('connect', function() {
 socket.on('robot_info', function(msg){
     // console.log("HELLO, I RECEIVED TELEMETRY :D")
     console.log(msg);
-    let cur_speed = msg.current_speed;
+    let cur_speed = msg.speed;
     let cur_angle = msg.angle;
-    const voltage = msg.voltage;
+    const voltage = msg.bat_vol;
     const mode = msg.mode;
 
     if(cur_speed!=undefined)document.getElementById('current_speed').innerText = 'Current speed: '+ cur_speed + " mm/s";
