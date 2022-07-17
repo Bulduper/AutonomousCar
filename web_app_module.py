@@ -5,6 +5,7 @@ import base64
 import cv2
 import models
 import json
+import copy
 
 socketio = SocketIO(message_queue='redis://localhost:7777')
 r= redis.Redis(host='localhost', port=7777, db=0)
@@ -26,8 +27,10 @@ logging_freq = 100.0
 #other data sending frequency
 to_server_freq = 5.0
 
-json_dict = dict()
+
 prev_telemetry = dict()
+prev_config = dict()
+prev_distance = dict()
 
 requestedImgKeys = []
 
@@ -45,18 +48,22 @@ def emitFrames(frames, scale=1.0):
 def emit(topic,data):
     socketio.emit(topic,data)
 
-def emitDataToApp():
-    global json_dict
-    emit('robot_info',json_dict)
-    json_dict = dict()
-    threading.Timer(1.0/to_server_freq,emitDataToApp).start()
 
 def emitUpdatedDatatoApp():
-    global json_dict
-    global prev_telemetry
-    json_dict = models.getTelemetryChanges(prev_telemetry)
-    prev_telemetry = models.telemetry.copy()
-    if json_dict: emit('robot_info',json_dict)
+    global prev_telemetry, prev_config, prev_distance
+
+    telemetry_json = models.getModifiedProperties(models.telemetry, prev_telemetry)
+    prev_telemetry = copy.deepcopy(models.telemetry)
+    if telemetry_json: emit('telemetry',telemetry_json)
+
+    config_json = models.getModifiedProperties(models.config, prev_config)
+    prev_config = copy.deepcopy(models.config)
+    if config_json: emit('config',config_json)
+
+    distance_json = models.distance
+    prev_distance = copy.deepcopy(models.distance)
+    if distance_json: emit('distance',distance_json)
+
     threading.Timer(1.0/to_server_freq,emitUpdatedDatatoApp).start()
 
 

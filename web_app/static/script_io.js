@@ -4,7 +4,7 @@ let dataOut = {};
 let dataOutUpdated = false;
 let availableImgs = [];
 var selectedImgKeys = [];
-const defaultImgKeysHome = ['detection','undistorted','mask','warped_plot']
+const defaultImgKeysHome = ['raw','warped','mask','warped_plot']
 const defaultImgKeysSettings = ['mask','warped','undistorted_plot','None']
 const modeSwitches = document.getElementsByClassName('form-check-input');
 
@@ -172,27 +172,40 @@ socket.on('connect', function() {
     //socket.emit('check' ,{data: 'User Connected'})
 });
 
-socket.on('robot_info', function(msg){
+socket.on('telemetry', function(msg){
     // console.log("HELLO, I RECEIVED TELEMETRY :D")
-    console.log(msg);
+    console.log('telemetry:',msg);
     let cur_speed = msg.speed;
     let cur_angle = msg.angle;
     const voltage = msg.bat_vol;
-    const mode = msg.mode;
 
     if(cur_speed!=undefined)document.getElementById('current_speed').innerText = 'Current speed: '+ cur_speed + " mm/s";
     if(cur_angle!=undefined)document.getElementById('current_angle').innerText = 'Angle: ' + cur_angle + " deg";
     if(voltage!=undefined)document.getElementById('current_voltage').innerText = 'LiPo voltage: ' + voltage + " V";
     if(msg.fps!=undefined)document.getElementById('fps').innerHTML = msg.fps + ' FPS';
+
+});
+
+socket.on('config', function(msg){
+    // console.log("HELLO, I RECEIVED TELEMETRY :D")
+    console.log('config:',msg);
+
     if(msg.speed_p!=undefined)document.getElementById('speedPRange').value = msg.speed_p;
-    if(msg.sensors!=undefined){
-        animateRobotView(msg.sensors)
-    }
+
 
     if(msg.state!=undefined){
         for(const stateKey in msg.state){
             document.getElementById(stateKey + 'Switch').checked = msg.state[stateKey];
         }
+    }
+});
+
+
+socket.on('distance', function(msg){
+    // console.log("HELLO, I RECEIVED TELEMETRY :D")
+    // console.log(msg);
+    if(msg!=undefined){
+        animateRobotView(msg)
     }
 });
 

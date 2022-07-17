@@ -112,7 +112,7 @@ def parseUartReponse(res):
             models.config.update(res_dict[message_type])
         if message_type == 'distance':
             models.distance = res_dict[message_type]
-            app.json_dict["sensors"]=models.distance
+            # app.json_dict["sensors"]=models.distance
         # if "speed" in res_dict:
         #     app.json_dict["current_speed"]=round(res_dict["speed"],1)
         #     parking.setSpeed(res_dict["speed"])
@@ -140,7 +140,7 @@ def parseEventMsg(channel, data):
     if channel == 'capture':
         pass
     if 'connected' in data:
-        app.json_dict['state'] = makeStateDict()
+        models.config['state'] = makeStateDict()
     if 'targetSpeed' in data:
         driver.setSpeed(data['targetSpeed'])
     if 'targetTurn' in data:
@@ -149,21 +149,27 @@ def parseEventMsg(channel, data):
         driver.setSpeedLimit(data['speedLimit'])
     if 'followLane' in data:
         state = data['followLane']['state']
+        models.config['state']['followLane'] = state
         FOLLOW_LANE = state
     if 'detectSigns' in data:
         state = data['detectSigns']['state']
+        models.config['state']['detectSigns'] = state
         SIGN_DETECTION = state
     if 'respectSigns' in data:
         state = data['respectSigns']['state']
+        models.config['state']['respectSigns'] = state
         RESPECT_SIGNS = state
     if 'parkingMode' in data:
         state = data['parkingMode']['state']
+        models.config['state']['parkingMode'] = state
         AUTO_PARK = state
     if 'avoidObstacles' in data:
         state = data['avoidObstacles']['state']
+        models.config['state']['avoidObstacles'] = state
         OBSTACLES_AVOIDANCE = state
     if 'undistort' in data:
         state = data['undistort']['state']
+        models.config['state']['undistort'] = state
         UNDISTORT = state
     if 'go' in data:
         state = data['go']['state']
@@ -273,7 +279,7 @@ def mainLoop():
         images['undistorted_plot'] = lane_finder_module.undist_plot.copy()
     images['detection'] = detection.getVisual()
 
-    # app.json_dict['fps'] = fps.getFps()
+    models.telemetry['fps'] = fps.getFps()
     # emit images to web app
     app.emitRequestedImages(images, scale=0.5)
 
