@@ -1,4 +1,4 @@
-telemetry = dict(speed=0, speed_limit=0, angle=0, pv="speed", bat_vol=0)
+telemetry = dict(speed=0, speed_limit=0, angle=0, pv="speed", bat_vol=0, pos=0.0)
 state = dict(followLane = False, detectSigns = False, respectSigns = False, parkingMode = False, avoidObstacles = False, undistort = False)
 config = dict(speed_kP=0,speed_kI=0,speed_kD=0,pos_kP=0,pos_kI=0,pos_kD=0, state=state)
 distance = [0,0,0,0,0,0]

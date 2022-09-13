@@ -59,6 +59,10 @@ def index():
 @app.route('/settings', methods=['GET','POST'])
 def settings():
     return render_template('settings.html')
+
+@app.route('/map', methods=['GET','POST'])
+def spaceMap():
+    return render_template('space_map.html')
 # @app.route('/video1')
 # def video_feed_1():
 #     return Response(makeFrame(),
