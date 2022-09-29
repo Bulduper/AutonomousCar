@@ -2,18 +2,21 @@ console.log("Hello");
 
 var socket = io();
 var canvas = document.getElementById("mapCanvas");
+var sumDy = document.getElementById("sumDy");
 // canvas.width = window.innerWidth;
 // canvas.height = window.innerHeight;
-canvas.width = 1000;
-canvas.height = 600;
+canvas.width = 700;
+canvas.height = 700;
 var ctx = canvas.getContext("2d");
 ctx.translate(canvas.width / 2, canvas.height / 2);
 
 let Dx = 0, Dy = 0, Dc = 0;
 let prevPos = 0.0;
 let curAngle = 0.0;
-const xOffset = 382*0.2*0.5;
-const MM_TO_PX = 3.0;
+let valSumDy = 0.0;
+let valSumDc = 0.0;
+const xOffset = 382*0.19*0.5;
+const MM_TO_PX = 0.5;
 const AXLE_DIST = 210.0;
 
 class Obstacle {
@@ -32,11 +35,17 @@ class Obstacle {
     };
 }
 
-var img = new Image();
-img.onload = function() {
-ctx.drawImage(img, 0, 0, 100, 100);
+var carImg = new Image();
+carImg.onload = function() {
+ctx.drawImage(carImg, 0, 0, 100, 100);
 }
-img.src = "../static/AC_photo_3.png";
+carImg.src = "../static/AC_photo_3.png";
+
+var coordSvg = new Image();
+coordSvg.onload = function() {
+ctx.drawImage(coordSvg, 0, 0, 100, 100);
+}
+coordSvg.src = "../static/coordinates.svg";
 
 
 var obstacles = [];
@@ -48,8 +57,12 @@ function drawCenter(){
     ctx.fill();
 }
 
-function drawCar(scale = 0.2){
-    ctx.drawImage(img, -382*scale*0.5, -768*scale*0.5, 382*scale, 768*scale);
+function drawCoordinates(scale = 1.0){
+    ctx.drawImage(coordSvg, -canvas.width*0.5*scale,-canvas.height*0.5*scale, canvas.width, canvas.height);
+}
+
+function drawCar(scale = 0.19){
+    ctx.drawImage(carImg, -382*scale*0.5, -768*scale*0.5, 382*scale, 768*scale);
 }
 
 // obstacles.push(new Obstacle(0, 0));
@@ -60,11 +73,13 @@ function drawCar(scale = 0.2){
 
 
 function drawCurrentObstacles(curObs) {
-    obstacles.push(new Obstacle(-curObs.left*MM_TO_PX - xOffset,-20));
-    obstacles.push(new Obstacle(curObs.right*MM_TO_PX + xOffset,-20));
+    obstacles.push(new Obstacle(-curObs.left*MM_TO_PX*10 - xOffset,-20));
+    obstacles.push(new Obstacle(curObs.right*MM_TO_PX*10 + xOffset,-20));
 }
 
 function updateTerrain(dx, dy, dc){
+    dx = dx*MM_TO_PX;
+    dy = dy*MM_TO_PX;
     for(const o of obstacles){
         let newx = (o.x+dx)*Math.cos(dc) - (o.y+dy)*Math.sin(dc);
         let newy = (o.x+dx)*Math.sin(dc) + (o.y+dy)*Math.cos(dc);
@@ -74,12 +89,17 @@ function updateTerrain(dx, dy, dc){
     Dc += dc;
 }
 
+function clearPoints(){
+    obstacles = [];
+}
+
 
 
 function Update() {
     ctx.clearRect(-canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
     drawCenter();
     drawCar();
+    drawCoordinates();
 
     for (let i = 0; i < obstacles.length; i++) {
         let o = obstacles[i];
@@ -106,6 +126,7 @@ socket.on('telemetry', function(msg){
     // and then the angle dc would be the arc's central angle
     // dc = dy/R
     let turnRadius = AXLE_DIST/Math.tan(curAngle*Math.PI/180.0);
+    console.log("Radius [mm]:" ,turnRadius)
     if(msg.pos){
         updateTerrain(0,msg.pos-prevPos,(msg.pos-prevPos)/turnRadius);
         prevPos=msg.pos;
