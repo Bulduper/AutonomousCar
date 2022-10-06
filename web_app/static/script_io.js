@@ -4,8 +4,8 @@ let dataOut = {};
 let dataOutUpdated = false;
 let availableImgs = [];
 var selectedImgKeys = [];
-const defaultImgKeysHome = ['raw','warped','mask','warped_plot']
-const defaultImgKeysSettings = ['mask','warped','undistorted_plot','None']
+const defaultImgKeysHome = ['raw', 'warped', 'mask', 'warped_plot']
+const defaultImgKeysSettings = ['mask', 'warped', 'undistorted_plot', 'None']
 const modeSwitches = document.getElementsByClassName('form-check-input');
 
 const consoleLogHome = document.getElementById('consoleLogHome');
@@ -21,61 +21,72 @@ const consoleLogHome = document.getElementById('consoleLogHome');
 //     dataOutUpdated = true;
 // }
 // document.getElementById('button').addEventListener('click', buttonPressedEmit);
-for(btn of document.getElementsByClassName('eventBtn')){
-    // btn.addEventListener('click', buttonPressedEmit);
-    btn.addEventListener('click', function(event){
-        const btnID = event.srcElement.id;
-        const varName = btnID.replace('Btn','');
-        dataOut[varName] = {state:true};
+for (btn of document.getElementsByClassName('eventBtn')) {
+    btn.addEventListener('click', function (event) {
+        //dataset.event is specified in DOM as data-event e.g data-event="go"
+        const eventAttribute = event.srcElement.dataset.event;
+        if (eventAttribute === "targetTurn") {
+            dataOut[eventAttribute] = 0;
+        } else {
+            dataOut[eventAttribute] = { state: true };
+        }
         dataOutUpdated = true;
     });
 }
 
-for(btn of document.getElementsByClassName('captureBtn')){
+for (btn of document.getElementsByClassName('captureBtn')) {
     // btn.addEventListener('click', buttonPressedEmit);
-    btn.addEventListener('click', function(event){
+    btn.addEventListener('click', function (event) {
         const btnID = event.srcElement.id;
         const index = btnID.match(/\d+/)[0];
         const selectObj = document.getElementById(`image${index}Select`)
-        if(selectObj){
+        if (selectObj) {
             const selectedValue = selectObj.value;
-            dataOut['capture'] = {imgKey:selectedValue};
+            dataOut['capture'] = { imgKey: selectedValue };
             dataOutUpdated = true;
         }
 
 
 
-        const varName = btnID.replace('Btn','');
-        dataOut[varName] = {state:true};
+        const varName = btnID.replace('Btn', '');
+        dataOut[varName] = { state: true };
         dataOutUpdated = true;
     });
 }
 
-document.getElementById('stopBtn').addEventListener('click',function(){
-    document.getElementById('targetSpeedRange').value=0;
+const stopVehicle = function () {
+    document.getElementById('targetSpeedRange').value = 0;
     document.getElementById('targetSpeedVal').innerText = 0;
-});
-document.getElementById('goBtn').addEventListener('click',function(){
-    document.getElementById('targetSpeedRange').value=150;
+}
+
+const resetTuringAngle = function () {
+    document.getElementById('targetTurnRange').value = 0;
+    document.getElementById('targetTurnVal').innerText = 0;
+}
+
+document.getElementById('stopBtn').addEventListener('click', stopVehicle);
+document.getElementById('goBtn').addEventListener('click', function () {
+    document.getElementById('targetSpeedRange').value = 150;
     document.getElementById('targetSpeedVal').innerText = 150;
 });
 
+document.getElementById('resetTargetSpeed').addEventListener('click', stopVehicle);
+document.getElementById('resetTargetTurn').addEventListener('click', resetTuringAngle);
 
-
-for(swtch of modeSwitches){
-    swtch.addEventListener('change', function(event){
+for (swtch of modeSwitches) {
+    swtch.addEventListener('change', function (event) {
         const swtchID = event.srcElement.id;
-        const varName = swtchID.replace('Switch','');
-        dataOut[varName]={state:this.checked};
+        const varName = swtchID.replace('Switch', '');
+        dataOut[varName] = { state: this.checked };
         dataOutUpdated = true;
     })
-    
-}
-function updateSelects(imageKeys){
 
-    for(sel of document.getElementsByClassName('form-select')){
-        let i=0;
-        for(imgKey of imageKeys){
+}
+function updateSelects(imageKeys) {
+
+    for (sel of document.getElementsByClassName('form-select')) {
+        let i = 0;
+        for (imgKey of imageKeys) {
             let opt = document.createElement('option');
             opt.value = imgKey;
             opt.innerHTML = imgKey;
@@ -83,13 +94,13 @@ function updateSelects(imageKeys){
             i++;
         }
         // sel.selectedIndex=2;
-        if(window.location.pathname=='/'){
+        if (window.location.pathname == '/') {
             const index = sel.id.match(/\d+/)[0];
-            sel.value = defaultImgKeysHome[index-1];
+            sel.value = defaultImgKeysHome[index - 1];
         }
-        if(window.location.pathname=='/settings'){
+        if (window.location.pathname == '/settings') {
             const index = sel.id.match(/\d+/)[0];
-            sel.value = defaultImgKeysSettings[index-1];
+            sel.value = defaultImgKeysSettings[index - 1];
         }
         // sel.value = 2;
         sel.dispatchEvent(new Event('change'));
@@ -97,23 +108,23 @@ function updateSelects(imageKeys){
 }
 
 
-for(range of document.getElementsByClassName('form-range')){
-    range.addEventListener('input',function(event){
+for (range of document.getElementsByClassName('form-range')) {
+    range.addEventListener('input', function (event) {
         const rangeID = event.srcElement.id;
-        const valID = rangeID.replace('Range','Val');
-        const varName = rangeID.replace('Range','');
+        const valID = rangeID.replace('Range', 'Val');
+        const varName = rangeID.replace('Range', '');
         document.getElementById(valID).innerText = this.value;
-        dataOut[varName]= varName=='targetTurn'?-this.value:this.value;
+        dataOut[varName] = varName == 'targetTurn' ? -this.value : this.value;
         dataOutUpdated = true;
     })
 }
 
-function updateRequestedImages(selectObj){
+function updateRequestedImages(selectObj) {
     const imgNo = selectObj.id.match(/\d+/)[0];
     //get the selected option text and add it to array
-    selectedImgKeys[imgNo-1]=selectObj.options[selectObj.selectedIndex].text;
-    console.log('selectedImgKeys',selectedImgKeys);
-    dataOut['requestedImgs']=selectedImgKeys;
+    selectedImgKeys[imgNo - 1] = selectObj.options[selectObj.selectedIndex].text;
+    console.log('selectedImgKeys', selectedImgKeys);
+    dataOut['requestedImgs'] = selectedImgKeys;
     dataOutUpdated = true;
     // const valID = rangeID.replace('Range','Val');
     // const varName = rangeID.replace('Range','');
@@ -123,8 +134,8 @@ function updateRequestedImages(selectObj){
 }
 
 
-for(sel of document.getElementsByClassName('form-select')){
-    sel.addEventListener('change',function(event){
+for (sel of document.getElementsByClassName('form-select')) {
+    sel.addEventListener('change', function (event) {
         updateRequestedImages(event.srcElement);
     })
 }
@@ -145,87 +156,89 @@ for(sel of document.getElementsByClassName('form-select')){
 //     dataOutUpdated = true;
 // });
 
-function emitDataOut(){
+function emitDataOut() {
     //emit only if dataOut is not empty and there is some new data
-    if(dataOutUpdated && Object.keys(dataOut).length !== 0 || dataOut.constructor !== Object){
-        socket.emit('event',JSON.stringify(dataOut));
+    if (dataOutUpdated && Object.keys(dataOut).length !== 0 || dataOut.constructor !== Object) {
+        socket.emit('event', JSON.stringify(dataOut));
         dataOutUpdated = false;
         dataOut = {};
     }
 }
 
-function buttonPressedEmit(event){
+function buttonPressedEmit(event) {
     // console.log(id.srcElement.id);
     const buttonId = event.srcElement.id;
-    socket.emit('buttonPressed',buttonId);
+    socket.emit('buttonPressed', buttonId);
 }
 
-socket.on('logs',function(msg) {
+socket.on('logs', function (msg) {
     // console.log('Channel logs: ',msg);
     consoleLogHome.value = msg + '\r\n' + consoleLogHome.value;
 });
 
-socket.on('connect', function() {
+socket.on('connect', function () {
     // socket.emit('connection', {data: 'I\'m connected!'});
-    dataOut['connected']=true;
+    dataOut['connected'] = true;
     dataOutUpdated = true;
     //socket.emit('check' ,{data: 'User Connected'})
 });
 
-socket.on('telemetry', function(msg){
+socket.on('telemetry', function (msg) {
     // console.log("HELLO, I RECEIVED TELEMETRY :D")
-    console.log('telemetry:',msg);
+    console.log('telemetry:', msg);
     let cur_speed = msg.speed;
     let cur_angle = msg.angle;
+    let cur_position = msg.pos;
     const voltage = msg.bat_vol;
 
-    if(cur_speed!=undefined)document.getElementById('current_speed').innerText = 'Current speed: '+ cur_speed + " mm/s";
-    if(cur_angle!=undefined)document.getElementById('current_angle').innerText = 'Angle: ' + cur_angle + " deg";
-    if(voltage!=undefined)document.getElementById('current_voltage').innerText = 'LiPo voltage: ' + voltage + " V";
-    if(msg.fps!=undefined)document.getElementById('fps').innerHTML = msg.fps + ' FPS';
+    if (cur_speed != undefined) document.getElementById('current_speed').innerText = 'Speed: ' + cur_speed + " mm/s";
+    if (cur_angle != undefined) document.getElementById('current_angle').innerText = 'Angle: ' + cur_angle + " deg";
+    if (cur_position != undefined) document.getElementById('current_position').innerText = 'Position: ' + cur_position + " mm";
+    if (voltage != undefined) document.getElementById('current_voltage').innerText = 'LiPo voltage: ' + voltage + " V";
+    if (msg.fps != undefined) document.getElementById('fps').innerHTML = msg.fps + ' FPS';
 
 });
 
-socket.on('config', function(msg){
+socket.on('config', function (msg) {
     // console.log("HELLO, I RECEIVED TELEMETRY :D")
-    console.log('config:',msg);
+    console.log('config:', msg);
 
-    if(msg.speed_p!=undefined)document.getElementById('speedPRange').value = msg.speed_p;
+    if (msg.speed_p != undefined) document.getElementById('speedPRange').value = msg.speed_p;
 
 
-    if(msg.state!=undefined){
-        for(const stateKey in msg.state){
+    if (msg.state != undefined) {
+        for (const stateKey in msg.state) {
             document.getElementById(stateKey + 'Switch').checked = msg.state[stateKey];
         }
     }
 });
 
 
-socket.on('distance', function(msg){
+socket.on('distance', function (msg) {
     // console.log("HELLO, I RECEIVED TELEMETRY :D")
     // console.log(msg);
-    if(msg!=undefined){
+    if (msg != undefined) {
         animateRobotView(msg)
     }
 });
 
 var intervalId = setInterval(emitDataOut, 200);
 
-socket.on('images',function(msg){
+socket.on('images', function (msg) {
     // console.log('Images',msg);
 
-    if(availableImgs.length == 0){
+    if (availableImgs.length == 0) {
         updateSelects(Object.keys(msg));
     }
     availableImgs = Object.keys(msg);
 
-    for(img of document.getElementsByClassName('img-fluid')){
+    for (img of document.getElementsByClassName('img-fluid')) {
         const index = img.id.match(/\d+/)[0];
         const selectObj = document.getElementById(`image${index}Select`)
-        if(selectObj){
+        if (selectObj) {
             const selectedValue = selectObj.value;
-            if(selectedValue!='None'){
-                img.src ="data:image/jpeg;base64,"+msg[selectedValue];
+            if (selectedValue != 'None') {
+                img.src = "data:image/jpeg;base64," + msg[selectedValue];
             } else {
                 img.src = '/static/unavailable.jpg';
             }
@@ -237,54 +250,49 @@ socket.on('images',function(msg){
     // const blob = msg.blob;
     // for(img of document.getElementsByClassName())
 });
-socket.on('image1', function(msg)
-{  
-   //console.log(image)
-   const image_element=document.getElementById('image1');
-   image_element.src="data:image/jpeg;base64,"+msg;
+socket.on('image1', function (msg) {
+    //console.log(image)
+    const image_element = document.getElementById('image1');
+    image_element.src = "data:image/jpeg;base64," + msg;
 });
-socket.on('image2', function(msg)
-{  
-   //console.log(image)
-   const image_element=document.getElementById('image2');
-   image_element.src="data:image/jpeg;base64,"+msg;
+socket.on('image2', function (msg) {
+    //console.log(image)
+    const image_element = document.getElementById('image2');
+    image_element.src = "data:image/jpeg;base64," + msg;
 });
-socket.on('image3', function(msg)
-{  
-   //console.log(image)
-   const image_element=document.getElementById('image3');
-   image_element.src="data:image/jpeg;base64,"+msg;
+socket.on('image3', function (msg) {
+    //console.log(image)
+    const image_element = document.getElementById('image3');
+    image_element.src = "data:image/jpeg;base64," + msg;
 });
-socket.on('image4', function(msg)
-{  
-   //console.log(image)
-   const image_element=document.getElementById('image4');
-   image_element.src="data:image/jpeg;base64,"+msg;
+socket.on('image4', function (msg) {
+    //console.log(image)
+    const image_element = document.getElementById('image4');
+    image_element.src = "data:image/jpeg;base64," + msg;
 });
 
-socket.on('image5', function(msg)
-{  
-   //console.log(image)
-   const image_element=document.getElementById('image5');
-   image_element.src="data:image/jpeg;base64,"+msg;
+socket.on('image5', function (msg) {
+    //console.log(image)
+    const image_element = document.getElementById('image5');
+    image_element.src = "data:image/jpeg;base64," + msg;
 });
 
-function animateRobotView(sensors_arr){
-    for(let i=0; i<6;i++){
+function animateRobotView(sensors_arr) {
+    for (let i = 0; i < 6; i++) {
         sensor_label[i].textContent = sensors_arr[i] + ' cm';
     }
 
 }
 
 
-function doSth(){
+function doSth() {
     console.log('Clicked');
     let xhr = new XMLHttpRequest();
 
-    xhr.open('POST','/process', true);
+    xhr.open('POST', '/process', true);
 
-    xhr.onload = function(){
-        if(this.status == 200){
+    xhr.onload = function () {
+        if (this.status == 200) {
             console.log(this.responseText)
         }
     }
@@ -297,14 +305,14 @@ let sensor_label = []
 let rect
 // It's important to add an load event listener to the object,
 // as it will load the svg doc asynchronously
-a.addEventListener("load",function(){
+a.addEventListener("load", function () {
 
     // get the inner DOM of alpha.svg
     var svgDoc = a.contentDocument;
     // get the inner element by id
     rect = svgDoc.getElementById("rect31");
-    for(let i=0; i<6; i++){
-        sensor_label[i]=svgDoc.getElementById(`sensor_${i}_dist_text`);
+    for (let i = 0; i < 6; i++) {
+        sensor_label[i] = svgDoc.getElementById(`sensor_${i}_dist_text`);
     }
     // add behaviour
     // delta.addEventListener("mousedown",function(){
@@ -312,9 +320,9 @@ a.addEventListener("load",function(){
     // }, false);
 }, false);
 
-socket.on('some_data',function(data){
-    console.log('some_data received',data);
-    document.getElementById('current_speed').textContent ='Current speed: '+data+ ' mm/s';
+socket.on('some_data', function (data) {
+    console.log('some_data received', data);
+    document.getElementById('current_speed').textContent = 'Current speed: ' + data + ' mm/s';
     sensor_label[0].textContent = data + ' cm';
     rect.style.fill = "green";
 })

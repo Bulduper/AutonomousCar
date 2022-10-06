@@ -120,5 +120,18 @@ If the image is not resized from 1640x1232 to 640x480, but when the detection ge
 Image cropping - makes huge difference when it comes to decetion distance.
 I found (x_min, y_min, x_max, y_max) = (0.2*w, 0.5*h, 0,8*w, 0.7*h) to work well (relative to 1640x1232 resolution).
 
+--------turning angle--------------
+To work out the numbers for the driving kinematics we need a relatively precise measurement of wheel angle (avg) and
+forward position (Y [mm]).
+By some trials it was found out, that the forward position can be measured relatively precisely. 
+A bigger problem is turning angle, since the front wheels are very wobbly.
+Also when turning there is some rear wheels slip which probably makes the measurements on tight turns quite imprecise.
 
+A test has been conducted. The car was let to circle with given turning angle.
+
+:::-40deg set:::
+Avg perimiter measured by motor&encoder: 2460mm => 392mm radius => -28deg!
+Radius measured by hand: 355mm => 31deg
+
+To be continued...
 

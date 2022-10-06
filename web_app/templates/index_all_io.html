@@ -98,16 +98,16 @@
                         </div>
                     </div>
                     <div class="col-6 d-flex ">
-                        <button type="button" class='eventBtn btn-primary flex-fill w-50' id="goBtn">GO</button>
-                        <button type="button" class='eventBtn btn-secondary flex-fill w-50' id="stopBtn">STOP</button> 
+                        <button type="button" class='eventBtn btn-primary flex-fill w-50' id="goBtn" data-event="go">GO</button>
+                        <button type="button" class='eventBtn btn-secondary flex-fill w-50' id="stopBtn" data-event="stop">STOP</button> 
                     </div>
                 </div>
                 <div class="row bg-light">
                     <h6 style="text-align: center;color: slategrey;">INFO</h6>
                     <h4 id="fps">- FPS</h4>
-                    <h4 id="current_speed">Current speed: - mm/s</h4>
+                    <h4 id="current_speed">Speed: - mm/s</h4>
                     <h4 id="current_angle">Angle: - deg</h4>
-                    <h4 id="current_mode">Mode: </h4>
+                    <h4 id="current_position">Position: - mm</h4>
                     <h4 id="current_voltage">LiPo voltage: </h4>
                 </div>
                 <div class="row">
@@ -117,7 +117,7 @@
                         <input type="range" class="form-range" id="targetSpeedRange" min="-150" max="150" value="0">
                     </div>
                     <div class="col-2">
-                        <button type="button" class="resetBtn" id=resetTargetSpeed>RESET</button>
+                        <button type="button" class="eventBtn" id=resetTargetSpeed data-event="stop">RESET</button>
                     </div>
 
                     <label for="targetTurnRange" class="form-label">Target turn: <span
@@ -126,7 +126,7 @@
                         <input type="range" class="form-range" id="targetTurnRange" min="-60" max="60" value="0">
                     </div>
                     <div class="col-2">
-                        <button type="button" class="resetBtn" id=resetTargetTurn>RESET</button>
+                        <button type="button" class="eventBtn" id="resetTargetTurn" data-event="targetTurn">RESET</button>
                     </div>
                 </div>
                 <div class="row">
